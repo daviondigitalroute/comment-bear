@@ -1,25 +1,28 @@
 /**
  * Supported programming languages
  */
-export type Lang = 
-  | "javascript" 
-  | "typescript" 
-  | "python" 
-  | "ruby" 
-  | "java" 
-  | "csharp" 
-  | "c" 
+export type Lang =
+  | "javascript"
+  | "typescript"
+  | "python"
+  | "ruby"
+  | "java"
+  | "csharp"
+  | "c"
   | "cpp"
-  | "html" 
-  | "css" 
-  | "sql" 
+  | "html"
+  | "css"
+  | "sql"
   | "yaml"
   | "json"
   | "xml"
   | "php"
   | "go"
   | "rust"
-  | "swift";
+  | "swift"
+  | "kotlin"
+  | "scala"
+  | "haskell";
 
 /**
  * Comment removal options

@@ -262,6 +262,150 @@ export function removeRubyComments(
 }
 
 /**
+ * Removes comments from Haskell code
+ * Handles -- line comments and {- -} block comments (including nested)
+ * Preserves {-# #-} pragmas
+ * @param code - Input code
+ * @param preserveLicense - Whether to preserve license comments
+ * @param keepEmptyLines - Whether to keep empty lines
+ * @returns Processed code
+ */
+export function removeHaskellComments(
+  code: string,
+  preserveLicense: boolean = false,
+  keepEmptyLines: boolean = false
+): string {
+  if (!code) return code;
+
+  let result = '';
+  let i = 0;
+  const len = code.length;
+
+  while (i < len) {
+    const char = code[i];
+    const next = i + 1 < len ? code[i + 1] : '';
+
+    // String literal (double quotes)
+    if (char === '"') {
+      let j = i + 1;
+      result += char;
+      while (j < len && code[j] !== '"') {
+        if (code[j] === '\\' && j + 1 < len) {
+          result += code[j] + code[j + 1];
+          j += 2;
+        } else {
+          result += code[j];
+          j++;
+        }
+      }
+      if (j < len) {
+        result += code[j]; // closing quote
+        j++;
+      }
+      i = j;
+      continue;
+    }
+
+    // Character literal (single quotes) - e.g. 'a', '\n'
+    if (char === "'" && i + 2 < len) {
+      // Check for character literal pattern: 'x' or '\x'
+      if (code[i + 1] === '\\' && i + 3 < len && code[i + 3] === "'") {
+        result += code.substring(i, i + 4);
+        i += 4;
+        continue;
+      }
+      if (code[i + 2] === "'") {
+        result += code.substring(i, i + 3);
+        i += 3;
+        continue;
+      }
+    }
+
+    // Pragma: {-# ... #-} - always preserve
+    if (char === '{' && next === '-' && i + 2 < len && code[i + 2] === '#') {
+      const pragmaEnd = code.indexOf('#-}', i + 3);
+      if (pragmaEnd !== -1) {
+        result += code.substring(i, pragmaEnd + 3);
+        i = pragmaEnd + 3;
+        continue;
+      }
+    }
+
+    // Block comment: {- ... -} (may be nested)
+    if (char === '{' && next === '-') {
+      let depth = 1;
+      let j = i + 2;
+      let commentContent = '{-';
+      while (j < len && depth > 0) {
+        if (code[j] === '{' && j + 1 < len && code[j + 1] === '-') {
+          depth++;
+          commentContent += '{-';
+          j += 2;
+        } else if (code[j] === '-' && j + 1 < len && code[j + 1] === '}') {
+          depth--;
+          commentContent += '-}';
+          j += 2;
+        } else {
+          commentContent += code[j];
+          j++;
+        }
+      }
+
+      if (preserveLicense && isLicenseComment(commentContent)) {
+        result += commentContent;
+      } else if (keepEmptyLines) {
+        // Count newlines in the comment and preserve them
+        const newlines = (commentContent.match(/\n/g) || []).length;
+        result += '\n'.repeat(newlines);
+      }
+      i = j;
+      continue;
+    }
+
+    // Line comment: --
+    if (char === '-' && next === '-') {
+      // Make sure it's not inside an operator (e.g., -->)
+      // A valid line comment starts with -- followed by non-operator char or end of line
+      const afterDashes = i + 2 < len ? code[i + 2] : '\n';
+      if (afterDashes === ' ' || afterDashes === '\n' || afterDashes === '\r' || afterDashes === '\t' || i + 2 >= len ||
+          !/[!#$%&*+./<=>?@\\^|~:]/.test(afterDashes)) {
+        // It's a line comment - find end of line
+        let j = i + 2;
+        let commentText = '--';
+        while (j < len && code[j] !== '\n') {
+          commentText += code[j];
+          j++;
+        }
+
+        if (preserveLicense && isLicenseComment(commentText)) {
+          result += commentText;
+        }
+        // Skip to newline (but don't consume it yet)
+        i = j;
+        continue;
+      }
+    }
+
+    result += char;
+    i++;
+  }
+
+  // Clean up empty lines if not keeping them
+  if (!keepEmptyLines) {
+    const lines = result.split('\n');
+    const cleaned: string[] = [];
+    for (const line of lines) {
+      if (line.trim().length > 0) {
+        cleaned.push(line);
+      }
+    }
+    result = cleaned.join('\n');
+  }
+
+  return result;
+}
+
+/**
  * Checks if a comment is a license comment
  */
 function isLicenseComment(comment: string): boolean {

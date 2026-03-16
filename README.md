@@ -7,17 +7,17 @@
 
   [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?style=flat-square&logo=github)](https://github.com/ivan-markov-666/comment-bear)
   [![npm](https://img.shields.io/badge/npm-comment--bear-blue?style=flat-square&logo=npm)](https://www.npmjs.com/package/comment-bear)
-  [![Tests](https://img.shields.io/badge/tests-788%2B-brightgreen?style=flat-square)](https://github.com/ivan-markov-666/comment-bear/actions)
+  [![Tests](https://img.shields.io/badge/tests-1043%2B-brightgreen?style=flat-square)](https://github.com/ivan-markov-666/comment-bear/actions)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
-  🐻 A fast and friendly tool for removing comments from code in multiple programming languages. Built with TypeScript and thoroughly tested with 788+ tests to ensure reliability and quality.
+  🐻 A fast and friendly tool for removing comments from code in multiple programming languages. Built with TypeScript and thoroughly tested with 1043+ tests to ensure reliability and quality.
 </div>
 
 ## ✨ Features
 
 - 🌐 **Language Support**:
-  - **Full Support**: JavaScript, TypeScript, Python, Java, C#, C, C++, HTML, CSS, SQL
-  - **Basic Support** (using generic comment patterns): PHP, Go, Rust, Swift, YAML, JSON, XML
+  - **Full Support**: JavaScript, TypeScript, Python, Java, C#, C, C++, HTML, CSS, SQL, Ruby, Haskell
+  - **Basic Support** (using generic comment patterns): PHP, Go, Rust, Swift, Kotlin, Scala, YAML, JSON, XML
   - *More languages coming soon!*
 
 - 🔍 **Automatic language detection** by file extension or content
@@ -26,6 +26,9 @@
 - ⚡ **High performance** with minimal dependencies
 - 🧪 **Dry-run mode** for preview
 - 📦 **Easy integration** with Node.js and TypeScript projects
+- 🖥️ **CLI tool** for command-line usage
+- 🌊 **Stream API** for processing large files
+- ⚙️ **Configuration files** (.commentbearrc) for project-level settings
 
 > **Note on Language Support**: 
 > - **Full Support**: Dedicated comment remover with language-specific rules
@@ -114,12 +117,13 @@ interface RemoveResult {
 #### Supported Languages (Lang)
 
 ```typescript
-type Lang = 
-  | "javascript" | "typescript" | "python" | "ruby" 
+type Lang =
+  | "javascript" | "typescript" | "python" | "ruby"
   | "java" | "csharp" | "c" | "cpp"
   | "html" | "css" | "sql" | "yaml"
-  | "json" | "xml" | "php" | "go" 
-  | "rust" | "swift";
+  | "json" | "xml" | "php" | "go"
+  | "rust" | "swift" | "kotlin" | "scala"
+  | "haskell";
 ```
 
 ## 🎯 Usage Examples
@@ -232,6 +236,151 @@ SELECT * FROM users;
 const result = removeComments(sqlCode, { language: 'sql' });
 ```
 
+#### Kotlin
+
+```typescript
+const kotlinCode = `
+// Data class comment
+data class User(
+    val name: String, // User name
+    val age: Int // User age
+)
+`;
+
+const result = removeComments(kotlinCode, { language: 'kotlin' });
+```
+
+#### Scala
+
+```typescript
+const scalaCode = `
+// Trait definition
+trait Greeter {
+  def greet(name: String): Unit // greet method
+}
+`;
+
+const result = removeComments(scalaCode, { language: 'scala' });
+```
+
+#### Haskell
+
+```typescript
+const haskellCode = `
+{-# LANGUAGE OverloadedStrings #-}
+-- | Main module
+module Main where
+
+-- Entry point
+main :: IO ()
+main = putStrLn "Hello" -- prints greeting
+`;
+
+const result = removeComments(haskellCode, { language: 'haskell' });
+// Pragmas ({-# #-}) are always preserved
+```
+
+## 🖥️ CLI Usage
+
+```bash
+# Install globally
+npm install -g comment-bear
+
+# Remove comments and print to stdout
+comment-bear src/index.js
+
+# Write to output file
+comment-bear src/index.js -o clean.js
+
+# Modify file in place
+comment-bear src/index.js -i
+
+# Multiple files in place
+comment-bear src/*.js -i
+
+# Force language detection
+comment-bear config.txt --language javascript
+
+# Preserve license comments
+comment-bear src/index.js --preserve-license
+
+# Preview what would be removed
+comment-bear src/index.js --dry-run
+
+# Use a config file
+comment-bear src/index.js --config .commentbearrc
+```
+
+### CLI Options
+
+| Option | Short | Description |
+|---|---|---|
+| `--help` | `-h` | Show help message |
+| `--version` | `-v` | Show version number |
+| `--output <file>` | `-o` | Write output to file |
+| `--in-place` | `-i` | Modify files in place |
+| `--language <lang>` | `-l` | Force language |
+| `--preserve-license` | | Keep license comments |
+| `--dry-run` | | Preview without modifying |
+| `--keep-empty-lines` | | Preserve empty lines |
+| `--config <path>` | `-c` | Path to config file |
+
+## 🌊 Stream API
+
+For processing large files efficiently:
+
+```typescript
+import { createCommentRemoverStream } from 'comment-bear';
+import { createReadStream, createWriteStream } from 'fs';
+
+// Pipe a file through the comment remover
+createReadStream('input.js')
+  .pipe(createCommentRemoverStream({ language: 'javascript' }))
+  .pipe(createWriteStream('output.js'));
+
+// With options
+createReadStream('input.js')
+  .pipe(createCommentRemoverStream({
+    language: 'javascript',
+    preserveLicense: true,
+    keepEmptyLines: true,
+  }))
+  .pipe(createWriteStream('output.js'));
+
+// Auto-detect language by filename
+createReadStream('input.py')
+  .pipe(createCommentRemoverStream({ filename: 'input.py' }))
+  .pipe(createWriteStream('output.py'));
+```
+
+## ⚙️ Configuration Files
+
+Create a `.commentbearrc` or `.commentbearrc.json` file in your project root:
+
+```json
+{
+  "language": "javascript",
+  "preserveLicense": true,
+  "keepEmptyLines": false,
+  "exclude": ["node_modules", "dist"],
+  "include": ["src/**/*.ts"]
+}
+```
+
+The CLI automatically discovers config files by walking up the directory tree from the current working directory.
+
+**Programmatic usage:**
+
+```typescript
+import { loadConfig, mergeConfig } from 'comment-bear';
+
+// Auto-discover and load config
+const config = loadConfig();
+
+// Load from specific path
+const config2 = loadConfig('.commentbearrc');
+```
+
 ## 🧪 Testing
 
 ```bash
@@ -249,7 +398,7 @@ npm test -- --watch
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/comment-bear.git
+git clone https://github.com/ivan-markov-666/comment-bear.git
 cd comment-bear
 
 # Install dependencies
@@ -267,8 +416,11 @@ npm run dev
 ```
 comment-bear/
 ├── src/
-│   ├── index.ts              # Main entry point
+│   ├── index.ts              # Main entry point & API exports
 │   ├── types.ts              # TypeScript types
+│   ├── cli.ts                # CLI tool
+│   ├── stream.ts             # Stream API
+│   ├── config.ts             # Configuration file support
 │   ├── detectors/            # Language detectors
 │   │   └── language-detector.ts
 │   └── removers/             # Language-specific removers
@@ -276,9 +428,9 @@ comment-bear/
 │       ├── python-remover.ts
 │       ├── css-html-remover.ts
 │       ├── sql-remover.ts
-│       ├── c-style-remover.ts
-│       └── other-remover.ts
-├── test/                     # Test
+│       ├── c-style-remover.ts  # Java, C#, C, C++, PHP, Go, Rust, Swift, Kotlin, Scala
+│       └── other-remover.ts    # JSON, YAML, Ruby, Haskell
+├── test/                     # Tests (1043+ test cases)
 ├── dist/                     # Compiled files (auto-generated)
 ├── package.json
 ├── tsconfig.json
@@ -311,12 +463,12 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🗺️ Roadmap
 
-- [ ] CLI tool
-- [ ] Support for more languages (Kotlin, Scala, Haskell)
+- [x] CLI tool
+- [x] Support for more languages (Kotlin, Scala, Haskell)
+- [x] Stream API for large file processing
+- [x] Configuration files (.commentbearrc)
 - [ ] Editor plugins (VS Code, IntelliJ)
 - [ ] GitHub Action for automatic comment removal
-- [ ] Stream API for large file processing
-- [ ] Configuration files (.ucremoverrc)
 
 ---
 

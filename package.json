@@ -4,6 +4,9 @@
   "description": "Universal comment remover for multiple programming languages with TypeScript support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "comment-bear": "./dist/cli.js"
+  },
   "scripts": {
     "clean": "rm -rf ./dist",
     "build": "npm run clean && tsc",
@@ -23,6 +26,10 @@
     "css",
     "sql",
     "yaml",
+    "kotlin",
+    "scala",
+    "haskell",
+    "cli",
     "code-cleanup"
   ],
   "author": "",

@@ -61,6 +61,18 @@ const EXTENSION_MAP: Record<string, Lang> = {
   '.go': 'go',
   '.rs': 'rust',
   '.swift': 'swift',
+
+  // Kotlin
+  '.kt': 'kotlin',
+  '.kts': 'kotlin',
+
+  // Scala
+  '.scala': 'scala',
+  '.sc': 'scala',
+
+  // Haskell
+  '.hs': 'haskell',
+  '.lhs': 'haskell',
 };
 
 /**
@@ -140,6 +152,13 @@ export function detectLanguageByContent(code: string): Lang | undefined {
     return 'ruby';
   }
   
+  // Haskell - check for Haskell-specific patterns (before Python due to import overlap)
+  if (/^\s*module\s+[A-Z][\w.]*\s+where/m.test(trimmed) ||
+      /^\s*\w+\s*::\s*.+->/.test(trimmed) ||
+      (/^\s*import\s+(qualified\s+)?[A-Z]/m.test(trimmed) && !/[{};]/.test(trimmed) && !/from\s/m.test(trimmed))) {
+    return 'haskell';
+  }
+
   // Python - check for Python-specific keywords with more specific patterns
   // Check for Python's def with colon and indentation
   if (/^\s*def\s+\w+\s*\([^)]*\)\s*:/m.test(trimmed) ||
@@ -149,32 +168,54 @@ export function detectLanguageByContent(code: string): Lang | undefined {
       /^\s*(import|from)\s+\w+/m.test(trimmed) && !/[{};]/.test(trimmed)) {
     return 'python';
   }
-  
+
   // PHP - check for PHP tags
   if (trimmed.includes('<?php')) {
     return 'php';
   }
-  
+
   // SQL - check for SQL keywords
   if (/^(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\s+/im.test(trimmed)) {
     return 'sql';
   }
-  
+
   // Java - check for Java-specific patterns
   if (/^(public|private|protected)\s+(class|interface|enum)/m.test(trimmed) ||
       trimmed.includes('System.out.println')) {
     return 'java';
   }
-  
+
   // C# - check for C#-specific patterns
   if (trimmed.includes('using System;') ||
       /namespace\s+\w+/m.test(trimmed)) {
     return 'csharp';
   }
-    
-// Rust - check for Rust-specific patterns
-  if (/^(fn|pub fn|impl|trait|mod|use)\s+/m.test(trimmed) ||
-      trimmed.includes('println!')) {
+
+  // Kotlin - check for Kotlin-specific patterns (before Rust/Go due to fun/val overlap)
+  if (/\bdata\s+class\b/m.test(trimmed) ||
+      (/\bfun\s+\w+/m.test(trimmed) && /\bval\s+\w+/m.test(trimmed))) {
+    return 'kotlin';
+  }
+  if (/^\s*package\s+[\w.]+\.[\w.]+/m.test(trimmed) &&
+      (/\bfun\s+/m.test(trimmed) || /\bval\s+/m.test(trimmed))) {
+    return 'kotlin';
+  }
+
+  // Scala - check for Scala-specific patterns (before Rust due to trait overlap)
+  if (/\bcase\s+class\b/m.test(trimmed) ||
+      (/^\s*(object|trait)\s+\w+/m.test(trimmed) &&
+       (/\bdef\s+\w+/m.test(trimmed) || /\bval\s+\w+/m.test(trimmed)))) {
+    return 'scala';
+  }
+  if (/^\s*package\s+[\w.]+\.[\w.]+/m.test(trimmed) &&
+      (/\btrait\s+/m.test(trimmed) || /\bobject\s+/m.test(trimmed))) {
+    return 'scala';
+  }
+
+  // Rust - check for Rust-specific patterns
+  if (/^(fn|pub fn|impl|mod|use)\s+/m.test(trimmed) ||
+      trimmed.includes('println!') ||
+      (/^\s*trait\s+\w+/m.test(trimmed) && !(/\bdef\s+/m.test(trimmed) || /\bval\s+/m.test(trimmed)))) {
     return 'rust';
   }
 
@@ -190,7 +231,7 @@ export function detectLanguageByContent(code: string): Lang | undefined {
       trimmed.includes('fmt.Println')) {
     return 'go';
   }
-  
+
   // TypeScript - check for TypeScript types
   if (/:\s*(string|number|boolean|any|void|never)\s*[=;,\)]/m.test(trimmed) ||
       trimmed.includes('interface ') ||

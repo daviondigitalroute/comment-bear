@@ -4,22 +4,30 @@ export { Lang, RemoveOptions, RemoveResult } from './types';
 // Export detectors
 export { detectLanguage, detectLanguageByFilename, detectLanguageByContent } from './detectors/language-detector';
 
+// Export stream API
+export { createCommentRemoverStream, CommentRemoverStream, CommentRemoverStreamOptions } from './stream';
+
+// Export config
+export { loadConfig, findConfigFile, CommentBearConfig } from './config';
+
 // Import removers
 import { removeJavaScriptComments, removeTypeScriptComments } from './removers/javascript-remover';
 import { removePythonComments } from './removers/python-remover';
 import { removeCssComments, removeHtmlComments, removeXmlComments } from './removers/css-html-remover';
 import { removeSqlComments } from './removers/sql-remover';
-import { 
-  removeJavaComments, 
-  removeCSharpComments, 
-  removeCComments, 
+import {
+  removeJavaComments,
+  removeCSharpComments,
+  removeCComments,
   removeCppComments,
   removePhpComments,
   removeGoComments,
   removeRustComments,
-  removeSwiftComments
+  removeSwiftComments,
+  removeKotlinComments,
+  removeScalaComments
 } from './removers/c-style-remover';
-import { removeJsonComments, removeYamlComments, removeRubyComments } from './removers/other-remover';
+import { removeJsonComments, removeYamlComments, removeRubyComments, removeHaskellComments } from './removers/other-remover';
 
 import { Lang, RemoveOptions, RemoveResult } from './types';
 import { detectLanguage, detectLanguageByFilename } from './detectors/language-detector';
@@ -147,6 +155,15 @@ export function removeComments(code: any, options: RemoveOptions = {}): RemoveRe
   case 'swift':
     processedCode = removeSwiftComments(code, preserveLicense, keepEmptyLines);
     break;
+  case 'kotlin':
+    processedCode = removeKotlinComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'scala':
+    processedCode = removeScalaComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'haskell':
+    processedCode = removeHaskellComments(code, preserveLicense, keepEmptyLines);
+    break;
   case 'yaml':
     processedCode = removeYamlComments(code, preserveLicense, keepEmptyLines);
     break;
@@ -217,8 +234,18 @@ function countComments(code: string, language: Lang, preserveLicense: boolean = 
       case 'rust':
       case 'swift':
       case 'php':
+      case 'kotlin':
+      case 'scala':
         if (trimmed.startsWith('//') || trimmed.startsWith('/*')) {
           count++;
+        }
+        break;
+      case 'haskell':
+        if (trimmed.startsWith('--') || trimmed.startsWith('{-')) {
+          // Don't count pragmas {-# ... #-}
+          if (!trimmed.startsWith('{-#')) {
+            count++;
+          }
         }
         break;
       case 'python':

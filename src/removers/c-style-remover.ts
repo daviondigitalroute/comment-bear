@@ -280,6 +280,36 @@ export function removeSwiftComments(
 }
 
 /**
+ * Removes comments from Kotlin code (uses C-style comments)
+ * @param code - Input code
+ * @param preserveLicense - Whether to preserve license comments
+ * @param keepEmptyLines - Whether to keep empty lines
+ * @returns Processed code
+ */
+export function removeKotlinComments(
+  code: string,
+  preserveLicense: boolean = false,
+  keepEmptyLines: boolean = false
+): string {
+  return removeJavaScriptComments(code, preserveLicense, keepEmptyLines);
+}
+
+/**
+ * Removes comments from Scala code (uses C-style comments)
+ * @param code - Input code
+ * @param preserveLicense - Whether to preserve license comments
+ * @param keepEmptyLines - Whether to keep empty lines
+ * @returns Processed code
+ */
+export function removeScalaComments(
+  code: string,
+  preserveLicense: boolean = false,
+  keepEmptyLines: boolean = false
+): string {
+  return removeJavaScriptComments(code, preserveLicense, keepEmptyLines);
+}
+
+/**
  * Checks if a comment is a license comment
  * (Copied from other-remover.ts)
  */
