@@ -2,6 +2,19 @@
 
 All notable changes to the Comment Bear project will be documented in this file.
 
+## [1.1.0] - 2026-03-16
+
+### Added
+- CLI tool (`comment-bear` command) with support for --in-place, --dry-run, --preserve-license, --keep-empty-lines flags
+- Language support for Kotlin, Scala, and Haskell
+- Additional unit tests (1043+ total)
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
 ## [1.0.0] - 2024-10-31
 
 ### Changed
