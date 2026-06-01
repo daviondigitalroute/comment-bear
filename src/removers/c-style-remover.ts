@@ -109,21 +109,19 @@ export function removePhpComments(
   
   // Process the code with heredocs protected
   let result = removeJavaScriptComments(withProtectedHeredocs, preserveLicense);
-  
-  // Restore heredocs
-  result = result.replace(/__HEREDOC_(\d+)__/g, (_, index) => {
-    const marker = heredocMarkers[parseInt(index)];
-    return marker ? marker.content : '';
-  });
-  
-  // Then remove # comments
+
+  // Then remove # comments. IMPORTANT: do this BEFORE restoring heredocs — the
+  // `__HEREDOC_N__` placeholders contain no `#`, so the heredoc/nowdoc bodies
+  // (which may legitimately contain `#` or comment-looking text) are not
+  // touched by this pass. Restoring first would expose those bodies and strip
+  // their `#` content, corrupting the string.
   const lines = result.split('\n');
   const finalLines: string[] = [];
-  
+
   for (const line of lines) {
     // Use the intelligent, stateful detector
     const commentIndex = findHashCommentIndex(line);
-    
+
     if (commentIndex === -1) {
       // No # comment found, add the line as is
       finalLines.push(line);
@@ -131,7 +129,7 @@ export function removePhpComments(
       // Found a # comment outside of a string
       const codeBeforeComment = line.substring(0, commentIndex).trimEnd();
       const comment = line.substring(commentIndex);
-      
+
       if (codeBeforeComment.length > 0) {
         // There's code before the comment
         if (preserveLicense && isLicenseComment(comment)) {
@@ -152,8 +150,16 @@ export function removePhpComments(
       }
     }
   }
-  
-  return finalLines.join('\n');
+
+  result = finalLines.join('\n');
+
+  // Restore heredocs LAST, after both comment passes.
+  result = result.replace(/__HEREDOC_(\d+)__/g, (_, index) => {
+    const marker = heredocMarkers[parseInt(index)];
+    return marker ? marker.content : '';
+  });
+
+  return result;
 }
 
 /**

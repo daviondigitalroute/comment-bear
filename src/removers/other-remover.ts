@@ -105,10 +105,34 @@ export function removeYamlComments(
   
   const lines = code.split('\n');
   const result: string[] = [];
-  
+
+  // Block-scalar state. A `key: |` or `key: >` (with optional `-`/`+`/digit
+  // indicators) introduces a literal/folded block scalar whose more-indented
+  // following lines are STRING CONTENT, not YAML — a `#` there is not a comment
+  // and must be preserved verbatim. The block ends at the first non-blank line
+  // indented at or below the indentation of the line that introduced it.
+  let inBlockScalar = false;
+  let blockIndent = 0;
+
+  const indentOf = (s: string): number => {
+    let n = 0;
+    while (n < s.length && (s[n] === ' ' || s[n] === '\t')) n++;
+    return n;
+  };
+
   for (const line of lines) {
     const trimmed = line.trim();
-    
+
+    if (inBlockScalar) {
+      // Blank lines stay inside the block; a non-blank line that is not more
+      // indented than the introducer ends the block.
+      if (trimmed.length === 0 || indentOf(line) > blockIndent) {
+        result.push(line); // verbatim — no comment stripping inside a block scalar
+        continue;
+      }
+      inBlockScalar = false; // fall through and process this line normally
+    }
+
     // Empty line or just a comment
     if (trimmed.startsWith('#')) {
       if (preserveLicense && isLicenseComment(trimmed)) {
@@ -118,20 +142,32 @@ export function removeYamlComments(
       }
       continue;
     }
-    
+
     // Line with code and comment.
     // In YAML, '#' only starts a comment when it is at the start of the line
     // (after leading whitespace) or is immediately preceded by whitespace.
     const commentIndex = findYamlCommentIndex(line);
+    let emitted: string;
     if (commentIndex !== -1) {
       const codeBeforeComment = line.substring(0, commentIndex).trimEnd();
       if (codeBeforeComment.length > 0) {
-        result.push(codeBeforeComment);
-      } else if (keepEmptyLines) {
-        result.push('');
+        emitted = codeBeforeComment;
+        result.push(emitted);
+      } else {
+        emitted = '';
+        if (keepEmptyLines) result.push('');
       }
     } else {
+      emitted = line;
       result.push(line);
+    }
+
+    // After emitting the (comment-stripped) line, detect a block-scalar
+    // introducer: a `|` or `>` indicator at the END of the value, optionally
+    // followed by `-`/`+` and/or a digit (e.g. `|`, `|-`, `>+`, `|2`, `|2-`).
+    if (/(^|[\s:])[|>][0-9]*[-+]?\s*$/.test(emitted)) {
+      inBlockScalar = true;
+      blockIndent = indentOf(line);
     }
   }
 
