@@ -30,7 +30,8 @@ const VALID_LANGUAGES: Lang[] = [
   'd', 'glsl', 'hlsl', 'wgsl', 'json5',
   'lua', 'elm', 'ada', 'vhdl', 'applescript', 'clojure', 'commonlisp',
   'scheme', 'emacslisp', 'assembly', 'erlang', 'latex', 'matlab', 'prolog',
-  'ocaml', 'fsharp', 'sml', 'pascal', 'vb', 'batch', 'fortran', 'vimscript'
+  'ocaml', 'fsharp', 'sml', 'pascal', 'vb', 'batch', 'fortran', 'vimscript',
+  'vue', 'svelte', 'markdown'
 ];
 
 export function parseArgs(args: string[]): CliOptions {
@@ -139,7 +140,7 @@ Supported languages:
   zig, vala, d, glsl, hlsl, wgsl, json5, lua, elm, ada, vhdl,
   applescript, clojure, commonlisp, scheme, emacslisp, assembly,
   erlang, latex, matlab, prolog, ocaml, fsharp, sml, pascal, vb,
-  batch, fortran, vimscript
+  batch, fortran, vimscript, vue, svelte, markdown
 
 Examples:
   comment-bear src/index.js                    # Print to stdout

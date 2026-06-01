@@ -78,7 +78,10 @@ export type Lang =
   | "vb"
   | "batch"
   | "fortran"
-  | "vimscript";
+  | "vimscript"
+  | "vue"
+  | "svelte"
+  | "markdown";
 
 /**
  * Comment removal options

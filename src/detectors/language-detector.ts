@@ -270,6 +270,20 @@ const EXTENSION_MAP: Record<string, Lang> = {
   // Vimscript
   '.vim': 'vimscript',
 
+  // Hybrid / templating languages.
+
+  // Vue (Single-File Component)
+  '.vue': 'vue',
+
+  // Svelte
+  '.svelte': 'svelte',
+
+  // Markdown
+  '.md': 'markdown',
+  '.markdown': 'markdown',
+  '.mdown': 'markdown',
+  '.mkd': 'markdown',
+
   // NOTE: matlab and prolog get NO extension mapping on purpose. `.m` is
   // already mapped to Objective-C and `.pl` to Perl, so MATLAB and Prolog are
   // reachable only via an explicit `--language matlab` / `--language prolog`.

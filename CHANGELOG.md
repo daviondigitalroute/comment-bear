@@ -10,6 +10,9 @@ All notable changes to the Comment Bear project will be documented in this file.
 - 12 C-style languages: Dart, Groovy/Gradle, Solidity, Protobuf, Objective-C (incl. `@"..."` literals), Zig, Vala, D (`/+ +/` nested blocks), GLSL, HLSL, WGSL, JSON5.
 - 22 more languages across the remaining comment families: Lua (long-bracket strings/comments), Elm, Ada, VHDL, AppleScript, Clojure, Common Lisp, Scheme, Emacs Lisp, Assembly, Erlang, LaTeX (`\%` aware), MATLAB (`%{ %}`), Prolog, OCaml, F#, Standard ML, Pascal, VB/VBA (`'`, `REM`), Batch (`REM`, `::`), Fortran (`!`), Vimscript (line-start `"`).
 - Optional `onlyAtLineStart` flag on the shared engine's line-comment spec (used by Vimscript; purely additive).
+- 3 hybrid/templating languages: Vue and Svelte (section-aware: `<template>`/`<script>`/`<style>` handled by the HTML/JS/CSS removers) and Markdown (HTML comments removed, but fenced code blocks and inline code spans preserved).
+- Coverage gate: `jest` `coverageThreshold` so CI fails on coverage regressions.
+- **80+ languages and 1383+ tests total.**
 - Language detection by shebang (`#!/usr/bin/env bash` → shell, etc.) and by special filename (`Makefile`, `Dockerfile`, `CMakeLists.txt`).
 - `keepEmptyLines` support for HTML, CSS, XML, SQL and JSON removers.
 - `mergeConfig` and `validateConfig` are now re-exported from the package entry point.

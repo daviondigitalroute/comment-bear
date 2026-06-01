@@ -154,3 +154,14 @@ describe('Phase 2 language detection', () => {
     expect(detectLanguageByFilename('config.jsonc')).toBe('json5');
   });
 });
+
+describe('Hybrid language detection', () => {
+  test('detects new extensions by filename', () => {
+    expect(detectLanguageByFilename('App.vue')).toBe('vue');
+    expect(detectLanguageByFilename('Component.svelte')).toBe('svelte');
+    expect(detectLanguageByFilename('README.md')).toBe('markdown');
+    expect(detectLanguageByFilename('doc.markdown')).toBe('markdown');
+    expect(detectLanguageByFilename('notes.mdown')).toBe('markdown');
+    expect(detectLanguageByFilename('notes.mkd')).toBe('markdown');
+  });
+});

@@ -90,6 +90,11 @@ import {
   removeFortranComments,
   removeVimComments
 } from './removers/phase3-remover';
+import {
+  removeVueComments,
+  removeSvelteComments,
+  removeMarkdownComments
+} from './removers/hybrid-remover';
 
 import { Lang, RemoveOptions, RemoveResult } from './types';
 import { detectLanguage, detectLanguageByFilename } from './detectors/language-detector';
@@ -420,6 +425,17 @@ export function removeComments(code: any, options: RemoveOptions = {}): RemoveRe
   case 'vimscript':
     processedCode = removeVimComments(code, preserveLicense, keepEmptyLines);
     break;
+
+  // Hybrid / templating languages.
+  case 'vue':
+    processedCode = removeVueComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'svelte':
+    processedCode = removeSvelteComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'markdown':
+    processedCode = removeMarkdownComments(code, preserveLicense, keepEmptyLines);
+    break;
 }
   } catch (error) {
     console.error(`Error removing comments for language ${language}:`, error);
@@ -614,6 +630,15 @@ function countComments(code: string, language: Lang, preserveLicense: boolean = 
         break;
       case 'vimscript':
         if (trimmed.startsWith('"')) {
+          count++;
+        }
+        break;
+
+      // Hybrid languages: count lines starting with an HTML comment.
+      case 'vue':
+      case 'svelte':
+      case 'markdown':
+        if (trimmed.startsWith('<!--')) {
           count++;
         }
         break;
