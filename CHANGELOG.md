@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0] - 2026-06-01
 
 Grew comment-bear from 21 to **80+ languages** on top of a new shared engine,
-fixed every issue from the code audit, and added CI and a coverage gate.
+fixed every issue from the code audit, and added a coverage gate.
 All changes are backwards compatible. Tests: 1043 → **1383**.
 
 ### Added
@@ -26,7 +26,7 @@ All changes are backwards compatible. Tests: 1043 → **1383**.
 - `keepEmptyLines` support for the HTML, CSS, XML, SQL and JSON removers.
 - `mergeConfig` and `validateConfig` are now re-exported from the package entry point.
 - Optional `onlyAtLineStart` flag on the engine's line-comment spec (used by Vimscript; purely additive).
-- **GitHub Actions CI** (Node 18/20/22 × Ubuntu/Windows/macOS) running type-check, build and tests, plus a coverage job, and a `coverageThreshold` gate so CI fails on coverage regressions.
+- Coverage gate via `jest` `coverageThreshold` (run with `npm run test:coverage`), so coverage regressions are caught.
 
 ### Changed
 - Fixed npm metadata: `repository`/`bugs`/`homepage` now point at the `comment-bear` repo; added `author` and `engines` (Node >= 16).

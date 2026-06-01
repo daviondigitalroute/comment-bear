@@ -7,8 +7,7 @@
 
   [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?style=flat-square&logo=github)](https://github.com/ivan-markov-666/comment-bear)
   [![npm](https://img.shields.io/badge/npm-comment--bear-blue?style=flat-square&logo=npm)](https://www.npmjs.com/package/comment-bear)
-  [![CI](https://github.com/ivan-markov-666/comment-bear/actions/workflows/ci.yml/badge.svg)](https://github.com/ivan-markov-666/comment-bear/actions/workflows/ci.yml)
-  [![Tests](https://img.shields.io/badge/tests-1383%2B-brightgreen?style=flat-square)](https://github.com/ivan-markov-666/comment-bear/actions)
+  [![Tests](https://img.shields.io/badge/tests-1383%2B-brightgreen?style=flat-square)](https://github.com/ivan-markov-666/comment-bear)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
   🐻 A fast, string-aware tool for removing comments from code in **80+ programming languages**. Written in TypeScript, ships a CLI and a Stream API, and is covered by **1383+ tests**.
@@ -438,7 +437,7 @@ npm run test:coverage
 npm test -- --watch
 ```
 
-CI runs type-check, build and the full test suite on Node 18/20/22 across Linux, Windows and macOS.
+The suite is also run locally with `npm run test:coverage`, which enforces a coverage threshold.
 
 ## 🏗️ Development
 
@@ -527,7 +526,7 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 - [x] Shared, string-aware comment engine (`removeBySpec`)
 - [x] 80+ languages across all major comment families
 - [x] Hybrid/templating support (Vue, Svelte, Markdown)
-- [x] CI on Node 18/20/22 × Linux/Windows/macOS + coverage gate
+- [x] Coverage gate (`npm run test:coverage`)
 - [ ] Editor plugins (VS Code, IntelliJ)
 - [ ] GitHub Action for automatic comment removal
 
