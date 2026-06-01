@@ -1320,7 +1320,7 @@ describe('Language Detection - Advanced', () => {
   test('detects various file extensions correctly', () => {
     expect(detectLanguage('component.jsx')).toBe('javascript');
     expect(detectLanguage('component.tsx')).toBe('typescript');
-    expect(detectLanguage('styles.scss')).toBe('css');
+    expect(detectLanguage('styles.scss')).toBe('scss');
     expect(detectLanguage('config.yml')).toBe('yaml');
     expect(detectLanguage('Program.cs')).toBe('csharp');
     expect(detectLanguage('main.h')).toBe('c');

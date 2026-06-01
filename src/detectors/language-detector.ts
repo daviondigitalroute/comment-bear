@@ -43,9 +43,9 @@ const EXTENSION_MAP: Record<string, Lang> = {
   '.html': 'html',
   '.htm': 'html',
   '.css': 'css',
-  '.scss': 'css',
-  '.sass': 'css',
-  '.less': 'css',
+  '.scss': 'scss',
+  '.sass': 'sass',
+  '.less': 'less',
   
   // SQL
   '.sql': 'sql',
@@ -73,6 +73,235 @@ const EXTENSION_MAP: Record<string, Lang> = {
   // Haskell
   '.hs': 'haskell',
   '.lhs': 'haskell',
+
+  // Shell
+  '.sh': 'shell',
+  '.bash': 'shell',
+  '.zsh': 'shell',
+  '.ksh': 'shell',
+  '.fish': 'shell',
+
+  // PowerShell
+  '.ps1': 'powershell',
+  '.psm1': 'powershell',
+  '.psd1': 'powershell',
+
+  // Perl
+  '.pl': 'perl',
+  '.pm': 'perl',
+  '.t': 'perl',
+  '.pod': 'perl',
+
+  // R (matched case-insensitively, so .R is covered too)
+  '.r': 'r',
+
+  // TOML
+  '.toml': 'toml',
+
+  // Makefile
+  '.mk': 'makefile',
+
+  // INI
+  '.ini': 'ini',
+  '.cfg': 'ini',
+
+  // GraphQL
+  '.graphql': 'graphql',
+  '.gql': 'graphql',
+
+  // Elixir
+  '.ex': 'elixir',
+  '.exs': 'elixir',
+
+  // Crystal
+  '.cr': 'crystal',
+
+  // Julia
+  '.jl': 'julia',
+
+  // Nim
+  '.nim': 'nim',
+
+  // CoffeeScript
+  '.coffee': 'coffeescript',
+
+  // Tcl
+  '.tcl': 'tcl',
+
+  // CMake
+  '.cmake': 'cmake',
+
+  // Java properties
+  '.properties': 'properties',
+
+  // Puppet
+  '.pp': 'puppet',
+
+  // HCL / Terraform
+  '.tf': 'hcl',
+  '.hcl': 'hcl',
+  '.tfvars': 'hcl',
+
+  // Dart
+  '.dart': 'dart',
+
+  // Groovy
+  '.groovy': 'groovy',
+  '.gradle': 'groovy',
+
+  // Solidity
+  '.sol': 'solidity',
+
+  // Protocol Buffers
+  '.proto': 'protobuf',
+
+  // Objective-C
+  '.m': 'objectivec',
+  '.mm': 'objectivec',
+
+  // Zig
+  '.zig': 'zig',
+
+  // Vala
+  '.vala': 'vala',
+
+  // D
+  '.d': 'd',
+
+  // GLSL (shading languages)
+  '.glsl': 'glsl',
+  '.vert': 'glsl',
+  '.frag': 'glsl',
+  '.comp': 'glsl',
+
+  // HLSL
+  '.hlsl': 'hlsl',
+
+  // WGSL
+  '.wgsl': 'wgsl',
+
+  // JSON5 / JSONC
+  '.json5': 'json5',
+  '.jsonc': 'json5',
+
+  // Phase 3 languages.
+
+  // Lua
+  '.lua': 'lua',
+
+  // Elm
+  '.elm': 'elm',
+
+  // Ada
+  '.adb': 'ada',
+  '.ads': 'ada',
+
+  // VHDL
+  '.vhd': 'vhdl',
+  '.vhdl': 'vhdl',
+
+  // AppleScript
+  '.applescript': 'applescript',
+
+  // Clojure
+  '.clj': 'clojure',
+  '.cljs': 'clojure',
+  '.cljc': 'clojure',
+  '.edn': 'clojure',
+
+  // Common Lisp
+  '.lisp': 'commonlisp',
+  '.cl': 'commonlisp',
+
+  // Scheme (also Racket)
+  '.scm': 'scheme',
+  '.ss': 'scheme',
+  '.rkt': 'scheme',
+
+  // Emacs Lisp
+  '.el': 'emacslisp',
+
+  // Assembly
+  '.asm': 'assembly',
+  '.s': 'assembly',
+
+  // Erlang
+  '.erl': 'erlang',
+  '.hrl': 'erlang',
+
+  // LaTeX
+  '.tex': 'latex',
+  '.sty': 'latex',
+
+  // OCaml
+  '.ml': 'ocaml',
+  '.mli': 'ocaml',
+
+  // F#
+  '.fs': 'fsharp',
+  '.fsx': 'fsharp',
+  '.fsi': 'fsharp',
+
+  // Standard ML
+  '.sml': 'sml',
+
+  // Pascal / Delphi
+  '.pas': 'pascal',
+  '.dpr': 'pascal',
+  '.lpr': 'pascal',
+
+  // Visual Basic
+  '.vb': 'vb',
+  '.vba': 'vb',
+  '.bas': 'vb',
+
+  // Batch
+  '.bat': 'batch',
+  '.cmd': 'batch',
+
+  // Fortran (free-form)
+  '.f90': 'fortran',
+  '.f95': 'fortran',
+  '.f03': 'fortran',
+  '.f08': 'fortran',
+  '.f': 'fortran',
+  '.for': 'fortran',
+
+  // Vimscript
+  '.vim': 'vimscript',
+
+  // Hybrid / templating languages.
+
+  // Vue (Single-File Component)
+  '.vue': 'vue',
+
+  // Svelte
+  '.svelte': 'svelte',
+
+  // Markdown
+  '.md': 'markdown',
+  '.markdown': 'markdown',
+  '.mdown': 'markdown',
+  '.mkd': 'markdown',
+
+  // NOTE: matlab and prolog get NO extension mapping on purpose. `.m` is
+  // already mapped to Objective-C and `.pl` to Perl, so MATLAB and Prolog are
+  // reachable only via an explicit `--language matlab` / `--language prolog`.
+};
+
+/**
+ * Mapping of special basenames (no useful extension) to languages.
+ * Keys are lowercased; lookups must lowercase the basename.
+ */
+const SPECIAL_FILENAMES: Record<string, Lang> = {
+  'makefile': 'makefile',
+  'gnumakefile': 'makefile',
+  'dockerfile': 'dockerfile',
+  'cmakelists.txt': 'cmake',
+  '.vimrc': 'vimscript',
+  'vimrc': 'vimscript',
+  '_vimrc': 'vimscript',
+  '.gvimrc': 'vimscript',
 };
 
 /**
@@ -90,7 +319,16 @@ export function detectLanguageByFilename(filename: string | undefined | null): L
   
   // Normalize the filename - trim spaces and remove trailing dots
   const normalized = filename.trim().replace(/\.+$/, '');
-  
+
+  // Special filenames without (or with a non-mapped) extension. These are
+  // matched on the basename (case-insensitive) and take precedence over the
+  // extension loop so e.g. `CMakeLists.txt` is detected as cmake.
+  const basename = normalized.replace(/^.*[\\/]/, '').toLowerCase();
+  const specialName = SPECIAL_FILENAMES[basename];
+  if (specialName) {
+    return specialName;
+  }
+
   // Check for exact extension match
   for (const [extension, lang] of Object.entries(EXTENSION_MAP)) {
     if (normalized.toLowerCase().endsWith(extension)) {
@@ -102,15 +340,53 @@ export function detectLanguageByFilename(filename: string | undefined | null): L
 }
 
 /**
+ * Maps a shebang line (e.g. `#!/usr/bin/env bash`) to a language.
+ *
+ * Looks at the interpreter named in the shebang. Recognises common shells,
+ * Python, Perl, Ruby and Node.
+ *
+ * @param shebangLine - The first line of the file, starting with `#!`
+ * @returns Detected language or undefined
+ */
+function detectLanguageByShebang(shebangLine: string): Lang | undefined {
+  const lower = shebangLine.toLowerCase();
+  if (/\b(bash|sh|zsh|ksh)\b/.test(lower)) {
+    return 'shell';
+  }
+  if (/\bpython[0-9.]*\b/.test(lower)) {
+    return 'python';
+  }
+  if (/\bperl\b/.test(lower)) {
+    return 'perl';
+  }
+  if (/\bruby\b/.test(lower)) {
+    return 'ruby';
+  }
+  if (/\bnode\b/.test(lower)) {
+    return 'javascript';
+  }
+  return undefined;
+}
+
+/**
  * Attempts to detect the language by code content
  * @param code - Code to analyze
  * @returns Detected language or undefined
  */
 export function detectLanguageByContent(code: string): Lang | undefined {
   if (!code || code.trim().length === 0) return undefined;
-  
+
   const trimmed = code.trim();
-  
+
+  // Shebang detection - map the interpreter on the first line to a language.
+  if (trimmed.startsWith('#!')) {
+    const firstLine = trimmed.split('\n')[0];
+    const shebangLang = detectLanguageByShebang(firstLine);
+    if (shebangLang) {
+      return shebangLang;
+    }
+  }
+
   // HTML - check for DOCTYPE or HTML tags
   if (trimmed.includes('<!DOCTYPE') || 
       /<html[\s>]/i.test(trimmed) ||

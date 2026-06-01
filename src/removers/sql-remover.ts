@@ -1,10 +1,17 @@
+import { isLicenseComment } from './_shared';
+
 /**
  * Removes comments from SQL code
  * @param code - Input code
  * @param preserveLicense - Whether to preserve license comments
+ * @param keepEmptyLines - Whether to keep empty lines where comments were
  * @returns Processed code
  */
-export function removeSqlComments(code: string, preserveLicense: boolean = false): string {
+export function removeSqlComments(
+  code: string,
+  preserveLicense: boolean = false,
+  keepEmptyLines: boolean = false
+): string {
   if (!code) return code;
   
   const lines = code.split('\n');
@@ -104,6 +111,9 @@ export function removeSqlComments(code: string, preserveLicense: boolean = false
       if (!isPreservingLicense) {
         result.push(processedLine);
       }
+    } else if (keepEmptyLines && !isPreservingLicense) {
+      // The line was comment-only (or already blank); keep it as a blank line.
+      result.push('');
     }
   }
   
@@ -116,13 +126,3 @@ export function removeSqlComments(code: string, preserveLicense: boolean = false
   return result.join('\n');
 }
 
-/**
- * Checks if the comment is a license comment
- */
-function isLicenseComment(comment: string): boolean {
-  const lower = comment.toLowerCase();
-  return lower.includes('copyright') ||
-         lower.includes('license') ||
-         lower.includes('licence') ||
-         lower.includes('author');
-}

@@ -8,7 +8,7 @@ export { detectLanguage, detectLanguageByFilename, detectLanguageByContent } fro
 export { createCommentRemoverStream, CommentRemoverStream, CommentRemoverStreamOptions } from './stream';
 
 // Export config
-export { loadConfig, findConfigFile, CommentBearConfig } from './config';
+export { loadConfig, findConfigFile, mergeConfig, validateConfig, CommentBearConfig } from './config';
 
 // Import removers
 import { removeJavaScriptComments, removeTypeScriptComments } from './removers/javascript-remover';
@@ -28,6 +28,73 @@ import {
   removeScalaComments
 } from './removers/c-style-remover';
 import { removeJsonComments, removeYamlComments, removeRubyComments, removeHaskellComments } from './removers/other-remover';
+import {
+  removeShellComments,
+  removePowerShellComments,
+  removePerlComments,
+  removeRComments,
+  removeTomlComments,
+  removeMakefileComments,
+  removeDockerfileComments,
+  removeIniComments,
+  removeGraphqlComments,
+  removeElixirComments,
+  removeCrystalComments,
+  removeJuliaComments,
+  removeNimComments,
+  removeCoffeeScriptComments,
+  removeTclComments,
+  removeCMakeComments,
+  removePropertiesComments,
+  removePuppetComments,
+  removeHclComments,
+  removeScssComments,
+  removeLessComments,
+  removeSassComments
+} from './removers/hash-remover';
+import {
+  removeDartComments,
+  removeGroovyComments,
+  removeSolidityComments,
+  removeProtobufComments,
+  removeObjectiveCComments,
+  removeZigComments,
+  removeValaComments,
+  removeDComments,
+  removeGlslComments,
+  removeHlslComments,
+  removeWgslComments,
+  removeJson5Comments
+} from './removers/cstyle-extra-remover';
+import {
+  removeLuaComments,
+  removeElmComments,
+  removeAdaComments,
+  removeVhdlComments,
+  removeAppleScriptComments,
+  removeClojureComments,
+  removeCommonLispComments,
+  removeSchemeComments,
+  removeEmacsLispComments,
+  removeAssemblyComments,
+  removeErlangComments,
+  removeLatexComments,
+  removeMatlabComments,
+  removePrologComments,
+  removeOcamlComments,
+  removeFSharpComments,
+  removeSmlComments,
+  removePascalComments,
+  removeVbComments,
+  removeBatchComments,
+  removeFortranComments,
+  removeVimComments
+} from './removers/phase3-remover';
+import {
+  removeVueComments,
+  removeSvelteComments,
+  removeMarkdownComments
+} from './removers/hybrid-remover';
 
 import { Lang, RemoveOptions, RemoveResult } from './types';
 import { detectLanguage, detectLanguageByFilename } from './detectors/language-detector';
@@ -168,21 +235,206 @@ export function removeComments(code: any, options: RemoveOptions = {}): RemoveRe
     processedCode = removeYamlComments(code, preserveLicense, keepEmptyLines);
     break;
   
-  // HTML, CSS, SQL, JSON, XML remain UNCHANGED (2 parameters)
+  // HTML, CSS, SQL, JSON, XML now also honor keepEmptyLines.
   case 'html':
-    processedCode = removeHtmlComments(code, preserveLicense);
+    processedCode = removeHtmlComments(code, preserveLicense, keepEmptyLines);
     break;
   case 'css':
-    processedCode = removeCssComments(code, preserveLicense);
+    processedCode = removeCssComments(code, preserveLicense, keepEmptyLines);
     break;
   case 'sql':
-    processedCode = removeSqlComments(code, preserveLicense);
+    processedCode = removeSqlComments(code, preserveLicense, keepEmptyLines);
     break;
   case 'json':
-    processedCode = removeJsonComments(code, preserveLicense);
+    processedCode = removeJsonComments(code, preserveLicense, keepEmptyLines);
     break;
   case 'xml':
-    processedCode = removeXmlComments(code, preserveLicense);
+    processedCode = removeXmlComments(code, preserveLicense, keepEmptyLines);
+    break;
+
+  // Phase 1 languages.
+  case 'shell':
+    processedCode = removeShellComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'powershell':
+    processedCode = removePowerShellComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'perl':
+    processedCode = removePerlComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'r':
+    processedCode = removeRComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'toml':
+    processedCode = removeTomlComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'makefile':
+    processedCode = removeMakefileComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'dockerfile':
+    processedCode = removeDockerfileComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'ini':
+    processedCode = removeIniComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'graphql':
+    processedCode = removeGraphqlComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'elixir':
+    processedCode = removeElixirComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'crystal':
+    processedCode = removeCrystalComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'julia':
+    processedCode = removeJuliaComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'nim':
+    processedCode = removeNimComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'coffeescript':
+    processedCode = removeCoffeeScriptComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'tcl':
+    processedCode = removeTclComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'cmake':
+    processedCode = removeCMakeComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'properties':
+    processedCode = removePropertiesComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'puppet':
+    processedCode = removePuppetComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'hcl':
+    processedCode = removeHclComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'scss':
+    processedCode = removeScssComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'less':
+    processedCode = removeLessComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'sass':
+    processedCode = removeSassComments(code, preserveLicense, keepEmptyLines);
+    break;
+
+  // Phase 2 C-style-comment languages.
+  case 'dart':
+    processedCode = removeDartComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'groovy':
+    processedCode = removeGroovyComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'solidity':
+    processedCode = removeSolidityComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'protobuf':
+    processedCode = removeProtobufComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'objectivec':
+    processedCode = removeObjectiveCComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'zig':
+    processedCode = removeZigComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'vala':
+    processedCode = removeValaComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'd':
+    processedCode = removeDComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'glsl':
+    processedCode = removeGlslComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'hlsl':
+    processedCode = removeHlslComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'wgsl':
+    processedCode = removeWgslComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'json5':
+    processedCode = removeJson5Comments(code, preserveLicense, keepEmptyLines);
+    break;
+
+  // Phase 3 languages.
+  case 'lua':
+    processedCode = removeLuaComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'elm':
+    processedCode = removeElmComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'ada':
+    processedCode = removeAdaComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'vhdl':
+    processedCode = removeVhdlComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'applescript':
+    processedCode = removeAppleScriptComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'clojure':
+    processedCode = removeClojureComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'commonlisp':
+    processedCode = removeCommonLispComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'scheme':
+    processedCode = removeSchemeComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'emacslisp':
+    processedCode = removeEmacsLispComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'assembly':
+    processedCode = removeAssemblyComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'erlang':
+    processedCode = removeErlangComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'latex':
+    processedCode = removeLatexComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'matlab':
+    processedCode = removeMatlabComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'prolog':
+    processedCode = removePrologComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'ocaml':
+    processedCode = removeOcamlComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'fsharp':
+    processedCode = removeFSharpComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'sml':
+    processedCode = removeSmlComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'pascal':
+    processedCode = removePascalComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'vb':
+    processedCode = removeVbComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'batch':
+    processedCode = removeBatchComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'fortran':
+    processedCode = removeFortranComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'vimscript':
+    processedCode = removeVimComments(code, preserveLicense, keepEmptyLines);
+    break;
+
+  // Hybrid / templating languages.
+  case 'vue':
+    processedCode = removeVueComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'svelte':
+    processedCode = removeSvelteComments(code, preserveLicense, keepEmptyLines);
+    break;
+  case 'markdown':
+    processedCode = removeMarkdownComments(code, preserveLicense, keepEmptyLines);
     break;
 }
   } catch (error) {
@@ -236,6 +488,18 @@ function countComments(code: string, language: Lang, preserveLicense: boolean = 
       case 'php':
       case 'kotlin':
       case 'scala':
+      case 'dart':
+      case 'groovy':
+      case 'solidity':
+      case 'protobuf':
+      case 'objectivec':
+      case 'zig':
+      case 'vala':
+      case 'd':
+      case 'glsl':
+      case 'hlsl':
+      case 'wgsl':
+      case 'json5':
         if (trimmed.startsWith('//') || trimmed.startsWith('/*')) {
           count++;
         }
@@ -268,6 +532,113 @@ function countComments(code: string, language: Lang, preserveLicense: boolean = 
         break;
       case 'sql':
         if (trimmed.startsWith('--') || trimmed.startsWith('/*')) {
+          count++;
+        }
+        break;
+
+      // Hash-comment Phase 1 languages: count lines starting with #, ; or !.
+      case 'shell':
+      case 'powershell':
+      case 'perl':
+      case 'r':
+      case 'toml':
+      case 'makefile':
+      case 'dockerfile':
+      case 'ini':
+      case 'graphql':
+      case 'elixir':
+      case 'crystal':
+      case 'julia':
+      case 'nim':
+      case 'coffeescript':
+      case 'tcl':
+      case 'cmake':
+      case 'properties':
+        if (trimmed.startsWith('#') || trimmed.startsWith(';') || trimmed.startsWith('!')) {
+          count++;
+        }
+        break;
+
+      // Slash-comment Phase 1 languages: count lines starting with // or /*.
+      case 'scss':
+      case 'less':
+      case 'sass':
+      case 'hcl':
+      case 'puppet':
+        if (trimmed.startsWith('//') || trimmed.startsWith('/*')) {
+          count++;
+        }
+        break;
+
+      // Phase 3 `--`-comment languages.
+      case 'lua':
+      case 'elm':
+      case 'ada':
+      case 'vhdl':
+      case 'applescript':
+        if (trimmed.startsWith('--')) {
+          count++;
+        }
+        break;
+
+      // Phase 3 `;`-comment languages (Lisp / asm).
+      case 'clojure':
+      case 'commonlisp':
+      case 'scheme':
+      case 'emacslisp':
+      case 'assembly':
+        if (trimmed.startsWith(';')) {
+          count++;
+        }
+        break;
+
+      // Phase 3 `%`-comment languages.
+      case 'erlang':
+      case 'latex':
+      case 'matlab':
+      case 'prolog':
+        if (trimmed.startsWith('%')) {
+          count++;
+        }
+        break;
+
+      // Phase 3 `(* *)`-block / `//` / `{` comment languages.
+      case 'ocaml':
+      case 'fsharp':
+      case 'sml':
+      case 'pascal':
+        if (trimmed.startsWith('(*') || trimmed.startsWith('//') || trimmed.startsWith('{')) {
+          count++;
+        }
+        break;
+
+      // Phase 3 miscellaneous languages.
+      case 'vb':
+        if (trimmed.startsWith("'") || /^REM\b/i.test(trimmed)) {
+          count++;
+        }
+        break;
+      case 'batch':
+        if (/^REM\b/i.test(trimmed) || trimmed.startsWith('::')) {
+          count++;
+        }
+        break;
+      case 'fortran':
+        if (trimmed.startsWith('!')) {
+          count++;
+        }
+        break;
+      case 'vimscript':
+        if (trimmed.startsWith('"')) {
+          count++;
+        }
+        break;
+
+      // Hybrid languages: count lines starting with an HTML comment.
+      case 'vue':
+      case 'svelte':
+      case 'markdown':
+        if (trimmed.startsWith('<!--')) {
           count++;
         }
         break;

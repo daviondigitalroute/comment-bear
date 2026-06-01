@@ -22,7 +22,16 @@ interface CliOptions {
 const VALID_LANGUAGES: Lang[] = [
   'javascript', 'typescript', 'python', 'ruby', 'java', 'csharp',
   'c', 'cpp', 'html', 'css', 'sql', 'yaml', 'json', 'xml',
-  'php', 'go', 'rust', 'swift', 'kotlin', 'scala', 'haskell'
+  'php', 'go', 'rust', 'swift', 'kotlin', 'scala', 'haskell',
+  'shell', 'powershell', 'perl', 'r', 'toml', 'makefile', 'dockerfile',
+  'ini', 'graphql', 'elixir', 'crystal', 'julia', 'nim', 'coffeescript',
+  'tcl', 'cmake', 'properties', 'puppet', 'hcl', 'scss', 'less', 'sass',
+  'dart', 'groovy', 'solidity', 'protobuf', 'objectivec', 'zig', 'vala',
+  'd', 'glsl', 'hlsl', 'wgsl', 'json5',
+  'lua', 'elm', 'ada', 'vhdl', 'applescript', 'clojure', 'commonlisp',
+  'scheme', 'emacslisp', 'assembly', 'erlang', 'latex', 'matlab', 'prolog',
+  'ocaml', 'fsharp', 'sml', 'pascal', 'vb', 'batch', 'fortran', 'vimscript',
+  'vue', 'svelte', 'markdown'
 ];
 
 export function parseArgs(args: string[]): CliOptions {
@@ -124,7 +133,14 @@ Options:
 Supported languages:
   javascript, typescript, python, ruby, java, csharp, c, cpp,
   html, css, sql, yaml, json, xml, php, go, rust, swift,
-  kotlin, scala, haskell
+  kotlin, scala, haskell, shell, powershell, perl, r, toml,
+  makefile, dockerfile, ini, graphql, elixir, crystal, julia,
+  nim, coffeescript, tcl, cmake, properties, puppet, hcl,
+  scss, less, sass, dart, groovy, solidity, protobuf, objectivec,
+  zig, vala, d, glsl, hlsl, wgsl, json5, lua, elm, ada, vhdl,
+  applescript, clojure, commonlisp, scheme, emacslisp, assembly,
+  erlang, latex, matlab, prolog, ocaml, fsharp, sml, pascal, vb,
+  batch, fortran, vimscript, vue, svelte, markdown
 
 Examples:
   comment-bear src/index.js                    # Print to stdout
@@ -158,7 +174,9 @@ export function processFile(
 
   const code = fs.readFileSync(filePath, 'utf-8');
   const result = removeComments(code, {
-    filename: path.basename(filePath),
+    // When an explicit language is supplied, do NOT pass the filename so the
+    // forced language wins (the library gives filename precedence otherwise).
+    filename: options.language ? undefined : path.basename(filePath),
     language: options.language,
     preserveLicense: options.preserveLicense,
     dryRun: options.dryRun,

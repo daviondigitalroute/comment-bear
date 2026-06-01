@@ -1,10 +1,17 @@
+import { isLicenseComment } from './_shared';
+
 /**
  * Removes comments from JSON code (JSON5 style)
  * @param code - Input code
  * @param preserveLicense - Whether to preserve license comments (not supported for JSON)
+ * @param keepEmptyLines - Whether to keep empty lines where comments were
  * @returns Processed code
  */
-export function removeJsonComments(code: string, preserveLicense: boolean = false): string {
+export function removeJsonComments(
+  code: string,
+  preserveLicense: boolean = false,
+  keepEmptyLines: boolean = false
+): string {
   if (!code) return code;
   
   try {
@@ -50,6 +57,9 @@ export function removeJsonComments(code: string, preserveLicense: boolean = fals
         if (char === '*' && nextChar === '/') {
           inMultiLineComment = false;
           i++;  // Skip '/'
+        } else if (char === '\n' && keepEmptyLines) {
+          // Preserve the newline count of removed block comments.
+          result += char;
         }
         continue;
       }
@@ -109,8 +119,10 @@ export function removeYamlComments(
       continue;
     }
     
-    // Line with code and comment
-    const commentIndex = findCommentIndex(line);
+    // Line with code and comment.
+    // In YAML, '#' only starts a comment when it is at the start of the line
+    // (after leading whitespace) or is immediately preceded by whitespace.
+    const commentIndex = findYamlCommentIndex(line);
     if (commentIndex !== -1) {
       const codeBeforeComment = line.substring(0, commentIndex).trimEnd();
       if (codeBeforeComment.length > 0) {
@@ -122,8 +134,61 @@ export function removeYamlComments(
       result.push(line);
     }
   }
-  
+
   return result.join('\n');
+}
+
+/**
+ * Finds the index of a YAML '#' comment in a line.
+ *
+ * Unlike a bare '#' scan, a '#' only starts a comment when it is at the start
+ * of the line (only whitespace before it) or is immediately preceded by a
+ * whitespace character. This keeps values such as `url: http://x#frag` and
+ * `color:#fff` intact while still stripping `a: 1 # comment`. The '#' inside
+ * quoted strings is ignored.
+ *
+ * @param line - A single line of YAML
+ * @returns Index of the comment '#', or -1 if there is none
+ */
+function findYamlCommentIndex(line: string): number {
+  let inString = false;
+  let stringChar = '';
+  let escapeNext = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+
+    if (escapeNext) {
+      escapeNext = false;
+      continue;
+    }
+
+    if (char === '\\') {
+      escapeNext = true;
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      if (!inString) {
+        inString = true;
+        stringChar = char;
+      } else if (char === stringChar) {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '#' && !inString) {
+      const prev = i > 0 ? line[i - 1] : '';
+      const atLineStart = i === 0 || line.substring(0, i).trim().length === 0;
+      const precededByWhitespace = prev === ' ' || prev === '\t';
+      if (atLineStart || precededByWhitespace) {
+        return i;
+      }
+    }
+  }
+
+  return -1;
 }
 
 /**
@@ -403,17 +468,6 @@ export function removeHaskellComments(
   }
 
   return result;
-}
-
-/**
- * Checks if a comment is a license comment
- */
-function isLicenseComment(comment: string): boolean {
-  const lower = comment.toLowerCase();
-  return lower.includes('copyright') ||
-         lower.includes('license') ||
-         lower.includes('licence') ||
-         lower.includes('author');
 }
 
 /**

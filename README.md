@@ -7,33 +7,26 @@
 
   [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?style=flat-square&logo=github)](https://github.com/ivan-markov-666/comment-bear)
   [![npm](https://img.shields.io/badge/npm-comment--bear-blue?style=flat-square&logo=npm)](https://www.npmjs.com/package/comment-bear)
-  [![Tests](https://img.shields.io/badge/tests-1043%2B-brightgreen?style=flat-square)](https://github.com/ivan-markov-666/comment-bear/actions)
+  [![CI](https://github.com/ivan-markov-666/comment-bear/actions/workflows/ci.yml/badge.svg)](https://github.com/ivan-markov-666/comment-bear/actions/workflows/ci.yml)
+  [![Tests](https://img.shields.io/badge/tests-1383%2B-brightgreen?style=flat-square)](https://github.com/ivan-markov-666/comment-bear/actions)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
-  🐻 A fast and friendly tool for removing comments from code in multiple programming languages. Built with TypeScript and thoroughly tested with 1043+ tests to ensure reliability and quality.
+  🐻 A fast, string-aware tool for removing comments from code in **80+ programming languages**. Written in TypeScript, ships a CLI and a Stream API, and is covered by **1383+ tests**.
 </div>
 
 ## ✨ Features
 
-- 🌐 **Language Support**:
-  - **Full Support**: JavaScript, TypeScript, Python, Java, C#, C, C++, HTML, CSS, SQL, Ruby, Haskell
-  - **Basic Support** (using generic comment patterns): PHP, Go, Rust, Swift, Kotlin, Scala, YAML, JSON, XML
-  - *More languages coming soon!*
+- 🌐 **80+ languages** out of the box ([full list](#-supported-languages))
+- 🧠 **String-aware**: comment tokens inside strings/char-literals are never touched
+- 🔍 **Auto-detection** by file extension, special filename, shebang, or content
+- 📝 **Preserve license comments** (`preserveLicense`)
+- 🧪 **Dry-run mode** to preview without modifying
+- 📏 **Keep-empty-lines mode** to retain layout
+- 🖥️ **CLI tool** + 🌊 **Stream API** for large files
+- ⚙️ **Config files** (`.commentbearrc`) discovered up the directory tree
+- 🔒 **Full TypeScript types** & minimal dependencies
 
-- 🔍 **Automatic language detection** by file extension or content
-- 📝 **Preserve license comments** (optional)
-- 🔒 **Type safety** with full TypeScript support
-- ⚡ **High performance** with minimal dependencies
-- 🧪 **Dry-run mode** for preview
-- 📦 **Easy integration** with Node.js and TypeScript projects
-- 🖥️ **CLI tool** for command-line usage
-- 🌊 **Stream API** for processing large files
-- ⚙️ **Configuration files** (.commentbearrc) for project-level settings
-
-> **Note on Language Support**: 
-> - **Full Support**: Dedicated comment remover with language-specific rules
-> - **Basic Support**: Uses generic comment patterns that work for most cases but might not handle all edge cases
-> - We're actively working on adding more languages and improving existing support
+> Most languages share one well-tested engine (`removeBySpec`) configured with that language's comment syntax, so adding a language is a few lines of spec plus tests.
 
 ## 📦 Installation
 
@@ -114,17 +107,31 @@ interface RemoveResult {
 }
 ```
 
-#### Supported Languages (Lang)
+See [Supported Languages](#-supported-languages) for the full `Lang` union.
 
-```typescript
-type Lang =
-  | "javascript" | "typescript" | "python" | "ruby"
-  | "java" | "csharp" | "c" | "cpp"
-  | "html" | "css" | "sql" | "yaml"
-  | "json" | "xml" | "php" | "go"
-  | "rust" | "swift" | "kotlin" | "scala"
-  | "haskell";
-```
+## 🌐 Supported Languages
+
+80+ languages, grouped by comment family. Use the `Lang` value with `{ language: ... }` or `--language`, or let auto-detection pick it from the filename/content.
+
+| Family | `Lang` values |
+|---|---|
+| **C-style** (`//`, `/* */`) | `javascript` `typescript` `java` `csharp` `c` `cpp` `go` `rust` `swift` `kotlin` `scala` `php` `dart` `groovy` `solidity` `protobuf` `objectivec` `zig` `vala` `d` `glsl` `hlsl` `wgsl` `json5` `scss` `less` `sass` `hcl` `puppet` |
+| **Hash** (`#`) | `python` `ruby` `shell` `powershell` `perl` `r` `toml` `yaml` `makefile` `dockerfile` `ini` `graphql` `elixir` `crystal` `julia` `nim` `coffeescript` `tcl` `cmake` `properties` |
+| **Dash** (`--`) | `sql` `haskell` `lua` `elm` `ada` `vhdl` `applescript` |
+| **Lisp / asm** (`;`) | `clojure` `commonlisp` `scheme` `emacslisp` `assembly` |
+| **Percent** (`%`) | `erlang` `latex` `matlab` `prolog` |
+| **ML-style** (`(* *)`) | `ocaml` `fsharp` `sml` `pascal` |
+| **Markup & data** | `html` `xml` `css` `json` |
+| **Hybrid / templating** | `vue` `svelte` `markdown` |
+| **Other** | `vb` (`'`, `REM`) · `batch` (`REM`, `::`) · `fortran` (`!`) · `vimscript` (`"`) |
+
+> **Highlights**: nested block comments (Rust, Swift, Haskell, Lua, OCaml, D `/+ +/`…), directive preservation (`//go:build`, `{-# #-}`, Dockerfile `# syntax=`, PHP 8 `#[Attribute]`), Lua long brackets `[[ ]]`/`--[=[ ]=]`, Objective-C `@"..."`, and SFC-aware Vue/Svelte (`<template>`/`<script>`/`<style>` each handled by the matching remover).
+
+> **Known limitations**:
+> - **MATLAB/Octave**: only `"`-strings are tracked, not `'` (it's also the transpose operator), so a `%` inside a `'...'` char array may be over-removed. Use `--language matlab` (`.m` maps to Objective-C).
+> - **Fortran**: only free-form `!` comments (not fixed-form column-1 `C`/`*`).
+> - **Vimscript**: only full-line `"` comments are removed; inline `"` is left intact to avoid corrupting strings.
+> - **Prolog**: reachable only via explicit `--language prolog` (`.pl` maps to Perl).
 
 ## 🎯 Usage Examples
 
@@ -280,6 +287,42 @@ const result = removeComments(haskellCode, { language: 'haskell' });
 // Pragmas ({-# #-}) are always preserved
 ```
 
+#### Vue / Svelte (hybrid)
+
+```typescript
+const vue = `
+<template>
+  <!-- comment --><div>{{ msg }}</div>
+</template>
+<script>
+// comment
+const msg = "hi";
+</script>
+<style>
+/* comment */
+.a { color: red; }
+</style>
+`;
+
+// Each block is processed by the matching remover (HTML / JS / CSS);
+// tags and {{ expressions }} are preserved.
+const result = removeComments(vue, { language: 'vue' });
+```
+
+#### Markdown
+
+```typescript
+const md = `
+# Title
+<!-- this HTML comment is removed -->
+\`\`\`html
+<!-- but comments inside fenced code blocks are kept -->
+\`\`\`
+`;
+
+const result = removeComments(md, { language: 'markdown' });
+```
+
 ## 🖥️ CLI Usage
 
 ```bash
@@ -295,10 +338,11 @@ comment-bear src/index.js -o clean.js
 # Modify file in place
 comment-bear src/index.js -i
 
-# Multiple files in place
-comment-bear src/*.js -i
+# Multiple files in place (glob is expanded by your shell;
+# on Windows PowerShell/cmd, pass explicit paths or use a POSIX shell)
+comment-bear src/a.js src/b.js -i
 
-# Force language detection
+# Force language (overrides auto-detection)
 comment-bear config.txt --language javascript
 
 # Preserve license comments
@@ -384,15 +428,17 @@ const config2 = loadConfig('.commentbearrc');
 ## 🧪 Testing
 
 ```bash
-# Run tests
+# Run tests (1383+)
 npm test
 
-# Run tests with coverage
-npm test -- --coverage
+# Run tests with coverage (enforces a coverage threshold)
+npm run test:coverage
 
 # Watch mode
 npm test -- --watch
 ```
+
+CI runs type-check, build and the full test suite on Node 18/20/22 across Linux, Windows and macOS.
 
 ## 🏗️ Development
 
@@ -424,18 +470,30 @@ comment-bear/
 │   ├── detectors/            # Language detectors
 │   │   └── language-detector.ts
 │   └── removers/             # Language-specific removers
+│       ├── _shared.ts          # Shared helpers + generic removeBySpec engine
 │       ├── javascript-remover.ts
 │       ├── python-remover.ts
 │       ├── css-html-remover.ts
 │       ├── sql-remover.ts
 │       ├── c-style-remover.ts  # Java, C#, C, C++, PHP, Go, Rust, Swift, Kotlin, Scala
-│       └── other-remover.ts    # JSON, YAML, Ruby, Haskell
-├── test/                     # Tests (1043+ test cases)
+│       ├── other-remover.ts    # JSON, YAML, Ruby, Haskell
+│       ├── hash-remover.ts     # Shell, PowerShell, Perl, R, TOML, Makefile, Dockerfile,
+│       │                       # INI, GraphQL, Elixir, Crystal, Julia, Nim, CoffeeScript,
+│       │                       # Tcl, CMake, properties, Puppet, HCL, SCSS, LESS, Sass
+│       ├── cstyle-extra-remover.ts # Dart, Groovy, Solidity, Protobuf, Objective-C, Zig,
+│       │                           # Vala, D, GLSL, HLSL, WGSL, JSON5
+│       ├── phase3-remover.ts   # Lua, Elm, Ada, VHDL, AppleScript, Clojure, Common Lisp,
+│       │                       # Scheme, Emacs Lisp, Assembly, Erlang, LaTeX, MATLAB,
+│       │                       # Prolog, OCaml, F#, SML, Pascal, VB, Batch, Fortran, Vim
+│       └── hybrid-remover.ts   # Vue, Svelte, Markdown (section-aware)
+├── test/                     # Tests (1383+ test cases)
 ├── dist/                     # Compiled files (auto-generated)
 ├── package.json
 ├── tsconfig.json
 └── README.md
 ```
+
+The shared `_shared.ts` engine (`removeBySpec`) drives most languages from a small declarative `CommentSpec` (line tokens, block tokens, string delimiters, and directive-preservation patterns). Adding a language is typically a few lines plus tests.
 
 ## 🤝 Contributing
 
@@ -464,9 +522,12 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 ## 🗺️ Roadmap
 
 - [x] CLI tool
-- [x] Support for more languages (Kotlin, Scala, Haskell)
 - [x] Stream API for large file processing
 - [x] Configuration files (.commentbearrc)
+- [x] Shared, string-aware comment engine (`removeBySpec`)
+- [x] 80+ languages across all major comment families
+- [x] Hybrid/templating support (Vue, Svelte, Markdown)
+- [x] CI on Node 18/20/22 × Linux/Windows/macOS + coverage gate
 - [ ] Editor plugins (VS Code, IntelliJ)
 - [ ] GitHub Action for automatic comment removal
 

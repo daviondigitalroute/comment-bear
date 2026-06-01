@@ -71,3 +71,97 @@ describe('Language Detection', () => {
     expect(() => detectLanguageByContent(binaryData as any)).toThrow(TypeError);
   });
 });
+
+describe('Phase 1 language detection', () => {
+  test('detects new extensions by filename', () => {
+    expect(detectLanguageByFilename('deploy.sh')).toBe('shell');
+    expect(detectLanguageByFilename('lib.bash')).toBe('shell');
+    expect(detectLanguageByFilename('start.fish')).toBe('shell');
+    expect(detectLanguageByFilename('module.ps1')).toBe('powershell');
+    expect(detectLanguageByFilename('script.pl')).toBe('perl');
+    expect(detectLanguageByFilename('analysis.r')).toBe('r');
+    expect(detectLanguageByFilename('analysis.R')).toBe('r');
+    expect(detectLanguageByFilename('Cargo.toml')).toBe('toml');
+    expect(detectLanguageByFilename('build.mk')).toBe('makefile');
+    expect(detectLanguageByFilename('config.ini')).toBe('ini');
+    expect(detectLanguageByFilename('settings.cfg')).toBe('ini');
+    expect(detectLanguageByFilename('schema.graphql')).toBe('graphql');
+    expect(detectLanguageByFilename('query.gql')).toBe('graphql');
+    expect(detectLanguageByFilename('mod.ex')).toBe('elixir');
+    expect(detectLanguageByFilename('test.exs')).toBe('elixir');
+    expect(detectLanguageByFilename('app.cr')).toBe('crystal');
+    expect(detectLanguageByFilename('calc.jl')).toBe('julia');
+    expect(detectLanguageByFilename('main.nim')).toBe('nim');
+    expect(detectLanguageByFilename('app.coffee')).toBe('coffeescript');
+    expect(detectLanguageByFilename('script.tcl')).toBe('tcl');
+    expect(detectLanguageByFilename('build.cmake')).toBe('cmake');
+    expect(detectLanguageByFilename('app.properties')).toBe('properties');
+    expect(detectLanguageByFilename('init.pp')).toBe('puppet');
+    expect(detectLanguageByFilename('main.tf')).toBe('hcl');
+    expect(detectLanguageByFilename('vars.tfvars')).toBe('hcl');
+    expect(detectLanguageByFilename('styles.scss')).toBe('scss');
+    expect(detectLanguageByFilename('styles.less')).toBe('less');
+    expect(detectLanguageByFilename('styles.sass')).toBe('sass');
+  });
+
+  test('detects special filenames without an extension', () => {
+    expect(detectLanguageByFilename('Makefile')).toBe('makefile');
+    expect(detectLanguageByFilename('makefile')).toBe('makefile');
+    expect(detectLanguageByFilename('GNUmakefile')).toBe('makefile');
+    expect(detectLanguageByFilename('Dockerfile')).toBe('dockerfile');
+    expect(detectLanguageByFilename('CMakeLists.txt')).toBe('cmake');
+  });
+
+  test('detects special filenames with a directory prefix', () => {
+    expect(detectLanguageByFilename('build/Dockerfile')).toBe('dockerfile');
+    expect(detectLanguageByFilename('src/Makefile')).toBe('makefile');
+  });
+
+  test('detects language by shebang', () => {
+    expect(detectLanguageByContent('#!/bin/bash\necho hi')).toBe('shell');
+    expect(detectLanguageByContent('#!/bin/sh\necho hi')).toBe('shell');
+    expect(detectLanguageByContent('#!/usr/bin/env zsh\necho hi')).toBe('shell');
+    expect(detectLanguageByContent('#!/usr/bin/env python3\nprint(1)')).toBe('python');
+    expect(detectLanguageByContent('#!/usr/bin/perl\nprint 1;')).toBe('perl');
+    expect(detectLanguageByContent('#!/usr/bin/env ruby\nputs 1')).toBe('ruby');
+    expect(detectLanguageByContent('#!/usr/bin/env node\nconsole.log(1)')).toBe('javascript');
+  });
+
+  test('detectLanguage falls back to shebang content detection', () => {
+    expect(detectLanguage(undefined, '#!/bin/bash\necho hi')).toBe('shell');
+  });
+});
+
+describe('Phase 2 language detection', () => {
+  test('detects new extensions by filename', () => {
+    expect(detectLanguageByFilename('main.dart')).toBe('dart');
+    expect(detectLanguageByFilename('build.groovy')).toBe('groovy');
+    expect(detectLanguageByFilename('build.gradle')).toBe('groovy');
+    expect(detectLanguageByFilename('Token.sol')).toBe('solidity');
+    expect(detectLanguageByFilename('schema.proto')).toBe('protobuf');
+    expect(detectLanguageByFilename('app.m')).toBe('objectivec');
+    expect(detectLanguageByFilename('app.mm')).toBe('objectivec');
+    expect(detectLanguageByFilename('main.zig')).toBe('zig');
+    expect(detectLanguageByFilename('app.vala')).toBe('vala');
+    expect(detectLanguageByFilename('main.d')).toBe('d');
+    expect(detectLanguageByFilename('shader.glsl')).toBe('glsl');
+    expect(detectLanguageByFilename('shader.vert')).toBe('glsl');
+    expect(detectLanguageByFilename('shader.frag')).toBe('glsl');
+    expect(detectLanguageByFilename('shader.comp')).toBe('glsl');
+    expect(detectLanguageByFilename('shader.hlsl')).toBe('hlsl');
+    expect(detectLanguageByFilename('shader.wgsl')).toBe('wgsl');
+    expect(detectLanguageByFilename('config.json5')).toBe('json5');
+    expect(detectLanguageByFilename('config.jsonc')).toBe('json5');
+  });
+});
+
+describe('Hybrid language detection', () => {
+  test('detects new extensions by filename', () => {
+    expect(detectLanguageByFilename('App.vue')).toBe('vue');
+    expect(detectLanguageByFilename('Component.svelte')).toBe('svelte');
+    expect(detectLanguageByFilename('README.md')).toBe('markdown');
+    expect(detectLanguageByFilename('doc.markdown')).toBe('markdown');
+    expect(detectLanguageByFilename('notes.mdown')).toBe('markdown');
+    expect(detectLanguageByFilename('notes.mkd')).toBe('markdown');
+  });
+});

@@ -1,3 +1,5 @@
+import { isLicenseComment } from './_shared';
+
 /**
  * Removes comments from Python code
  * @param code - Input code
@@ -161,18 +163,6 @@ function isDocstringContext(lines: string[], index: number): boolean {
   }
   
   return false;
-}
-
-/**
- * Checks if the comment is a license comment
- */
-function isLicenseComment(comment: string): boolean {
-  const lower = comment.toLowerCase();
-  return lower.includes('copyright') ||
-         lower.includes('license') ||
-         lower.includes('licence') ||
-         lower.includes('spdx') ||
-         lower.includes('author');
 }
 
 /**

@@ -1,4 +1,5 @@
 import { removeJavaScriptComments } from './javascript-remover';
+import { isLicenseComment } from './_shared';
 
 /**
  * Removes comments from Java code (uses C-style comments)
@@ -169,11 +170,12 @@ export function removeGoComments(
 ): string {
   if (!code) return code;
   
-  // First, protect build tags (// +build ...)
-  const buildTagPattern = /^\/\/ \+build[^\n]*$/gm;
+  // First, protect build tags (// +build ...) and modern directive comments
+  // (//go:build, //go:embed, //go:generate, ...).
+  const buildTagPattern = /^(?:\/\/ \+build[^\n]*|\/\/go:[a-z]+[^\n]*)$/gm;
   const buildTags: {id: string, content: string}[] = [];
   let buildTagIndex = 0;
-  
+
   const withProtectedBuildTags = code.replace(buildTagPattern, (match) => {
     const id = `__BUILD_TAG_${buildTagIndex++}__`;
     buildTags.push({ id, content: match });
@@ -310,18 +312,6 @@ export function removeScalaComments(
 }
 
 /**
- * Checks if a comment is a license comment
- * (Copied from other-remover.ts)
- */
-function isLicenseComment(comment: string): boolean {
-  const lower = comment.toLowerCase();
-  return lower.includes('copyright') ||
-         lower.includes('license') ||
-         lower.includes('licence') ||
-         lower.includes('author');
-}
-
-/**
  * Finds the index of a # comment in a line (ignores # in strings)
  * (Copied from other-remover.ts)
  */
@@ -356,11 +346,15 @@ function findHashCommentIndex(line: string): number {
 
     // TODO: This logic doesn't handle heredoc/nowdoc yet.
     // For now it's sufficient to pass the test.
-    
+
     if (char === '#' && !inString) {
+      // PHP 8 attributes: #[Attr(...)] is NOT a comment.
+      if (line[i + 1] === '[') {
+        continue;
+      }
       return i;
     }
   }
-  
+
   return -1;
 }

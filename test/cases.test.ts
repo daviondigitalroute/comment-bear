@@ -326,8 +326,9 @@ describe('Language Detection - Edge Cases & Boundary Conditions', () => {
     });
 
     test('filename without extension, use content', () => {
+      // README has no filename-based detection, so content wins.
       const code = '<!DOCTYPE html><html></html>';
-      const result = detectLanguage('Dockerfile', code);
+      const result = detectLanguage('README', code);
       expect(result).toBe('html');
     });
 
@@ -343,14 +344,14 @@ describe('Language Detection - Edge Cases & Boundary Conditions', () => {
   // ============================================================================
   describe('Special Filenames Without Extensions', () => {
     test('Makefile detection', () => {
-      // Makefile обикновено няма extension и не е в EXTENSION_MAP
+      // Makefile is detected as makefile via special-filename handling.
       const result = detectLanguageByFilename('Makefile');
-      expect(result).toBeUndefined();
+      expect(result).toBe('makefile');
     });
 
     test('Dockerfile detection', () => {
       const result = detectLanguageByFilename('Dockerfile');
-      expect(result).toBeUndefined();
+      expect(result).toBe('dockerfile');
     });
 
     test('README detection', () => {
