@@ -1,16 +1,8 @@
 /**
- * Type declarations for modules without TypeScript definitions
+ * Type declarations for modules without TypeScript definitions.
+ *
+ * (Currently empty — the package has no runtime dependencies. Add ambient
+ * module declarations here if an untyped dependency is introduced.)
  */
 
-declare module 'strip-comments' {
-  interface StripOptions {
-    line?: boolean;
-    block?: boolean;
-    keepProtected?: boolean;
-    preserveNewlines?: boolean;
-  }
-  
-  function strip(input: string, options?: StripOptions): string;
-  
-  export = strip;
-}
+export {};

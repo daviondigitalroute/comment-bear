@@ -7,10 +7,10 @@
 
   [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?style=flat-square&logo=github)](https://github.com/ivan-markov-666/comment-bear)
   [![npm](https://img.shields.io/badge/npm-comment--bear-blue?style=flat-square&logo=npm)](https://www.npmjs.com/package/comment-bear)
-  [![Tests](https://img.shields.io/badge/tests-1383%2B-brightgreen?style=flat-square)](https://github.com/ivan-markov-666/comment-bear)
+  [![Tests](https://img.shields.io/badge/tests-1396%2B-brightgreen?style=flat-square)](https://github.com/ivan-markov-666/comment-bear)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
-  🐻 A fast, string-aware tool for removing comments from code in **80+ programming languages**. Written in TypeScript, ships a CLI and a Stream API, and is covered by **1383+ tests**.
+  🐻 A fast, string-aware tool for removing comments from code in **80+ programming languages**. Written in TypeScript, ships a CLI and a Stream API, has zero runtime dependencies, and is covered by **1396+ tests**.
 </div>
 
 ## ✨ Features
@@ -23,7 +23,7 @@
 - 📏 **Keep-empty-lines mode** to retain layout
 - 🖥️ **CLI tool** + 🌊 **Stream API** for large files
 - ⚙️ **Config files** (`.commentbearrc`) discovered up the directory tree
-- 🔒 **Full TypeScript types** & minimal dependencies
+- 🔒 **Full TypeScript types** & **zero runtime dependencies**
 
 > Most languages share one well-tested engine (`removeBySpec`) configured with that language's comment syntax, so adding a language is a few lines of spec plus tests.
 
@@ -485,7 +485,7 @@ comment-bear/
 │       │                       # Scheme, Emacs Lisp, Assembly, Erlang, LaTeX, MATLAB,
 │       │                       # Prolog, OCaml, F#, SML, Pascal, VB, Batch, Fortran, Vim
 │       └── hybrid-remover.ts   # Vue, Svelte, Markdown (section-aware)
-├── test/                     # Tests (1383+ test cases)
+├── test/                     # Tests (1396+ test cases)
 ├── dist/                     # Compiled files (auto-generated)
 ├── package.json
 ├── tsconfig.json
@@ -510,8 +510,8 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- [strip-comments](https://github.com/jonschlinkert/strip-comments) - for JavaScript comments
-- [strip-json-comments](https://github.com/sindresorhus/strip-json-comments) - for JSON comments
+Comment removal is powered by an in-house, string-aware linear scanner
+(`removeBySpec`) — no third-party comment-stripping dependencies.
 
 ## 📞 Contact
 

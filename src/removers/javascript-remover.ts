@@ -1,59 +1,95 @@
-import stripComments from 'strip-comments';
+import { removeBySpec, CommentSpec } from './_shared';
 
 /**
- * Removes comments from JavaScript/TypeScript code
+ * Comment specification for JavaScript / TypeScript.
+ *
+ * - `//` line comments and `/` + `* ... *` + `/` block comments.
+ * - Double-, single- and backtick (template) string literals, all escapable.
+ *   Template literals are multiline.
+ * - `regexLiterals` enables single-pass recognition of regex literals
+ *   (`/.../flags`) so a regex body containing comment-looking tokens is not
+ *   mistaken for a comment.
+ * - `preserveInlineBlockWhitespace` reproduces the historical behaviour where
+ *   removing an inline comment leaves its surrounding spaces in place.
+ * - Block comments are tracked as nested (depth-counted). Real JavaScript block
+ *   comments do not nest, but the previous implementation effectively consumed
+ *   nested-looking comments as a single comment and the test-suite encodes that
+ *   behaviour; depth tracking is still strictly linear.
+ * - `preserve` keeps `/*!` banner comments only when preserving license
+ *   comments (the convention used by the pre-processing below and by minifiers).
+ *
+ * @param preserveLicense - When true, keep `/*!` banner comments.
+ * @returns The JavaScript/TypeScript comment specification.
+ */
+function jsSpec(preserveLicense: boolean): CommentSpec {
+  return {
+    line: [{ token: '//' }],
+    block: [{ open: '/*', close: '*/', nested: true }],
+    strings: [
+      { open: '"', close: '"', escape: '\\' },
+      { open: "'", close: "'", escape: '\\' },
+      { open: '`', close: '`', escape: '\\', multiline: true },
+    ],
+    regexLiterals: true,
+    preserveInlineBlockWhitespace: true,
+    preserve: preserveLicense ? [/^\/\*!/] : [],
+  };
+}
+
+/**
+ * Removes comments from JavaScript/TypeScript code.
+ *
+ * The default (and license-preserving) path routes everything through the
+ * linear, single-pass `removeBySpec` engine, which cannot backtrack and
+ * therefore cannot hang on pathological inputs. The previous
+ * `strip-comments`-based implementation could hang (catastrophic regex
+ * backtracking) on JS that interleaves regex literals with `//` comments; that
+ * dependency is no longer used.
+ *
+ * The `keepEmptyLines` path uses a separate, line-based pass
+ * (`removeCommentsPreservingLines`) that reproduces the historical blank-line
+ * behaviour. It is a simple per-line scanner with no cross-line backtracking,
+ * so it cannot hang either.
+ *
  * @param code - Input code
  * @param preserveLicense - Whether to preserve license comments
  * @param keepEmptyLines - Whether to keep empty lines
  * @returns Processed code
  */
 export function removeJavaScriptComments(
-  code: string, 
+  code: string,
   preserveLicense: boolean = false,
   keepEmptyLines: boolean = false
 ): string {
   if (!code) return code;
-  
-  // Pre-process: Mark JavaDoc license comments with /*! to preserve them
+
+  // Pre-process license comments so they survive removal. This preserves the
+  // historical, test-encoded behaviour: JSDoc-style `/** ... */` banners that
+  // contain @license/@copyright/@author are converted to `/*! ... */` banners
+  // (kept via the spec's preserve pattern), and `// @license` / `// @copyright`
+  // single-line comments are converted to `/*! ... */` block banners.
   let processedCode = code;
   if (preserveLicense) {
-    // Convert /** @license */ to /*! @license */ for strip-comments library
     processedCode = code.replace(/\/\*\*[\s\S]*?@license[\s\S]*?\*\//g, (match) => {
       return match.replace('/**', '/*!');
     });
-    
-    // Also handle /** @copyright */ and /** @author */
+
     processedCode = processedCode.replace(/\/\*\*[\s\S]*?@(copyright|author)[\s\S]*?\*\//g, (match) => {
       return match.replace('/**', '/*!');
     });
-    
-    // Handle // @license single-line comments
+
     processedCode = processedCode.replace(/\/\/\s*@(license|copyright)[^\n]*/g, (match) => {
       return '/*!' + match.substring(2) + '*/';
     });
   }
-  
+
   if (keepEmptyLines) {
-    const result = removeCommentsPreservingLines(processedCode, preserveLicense);
-    // Do NOT call trimEmptyLines() when we want to preserve empty lines!
-    return result;
+    // Preserve the original line structure (blank lines where comments were).
+    return removeCommentsPreservingLines(processedCode, preserveLicense);
   }
 
-  const options: any = {
-    line: true,
-    block: true,
-    keepProtected: preserveLicense,
-    preserveNewlines: false
-  };
-
-  try {
-    const result = stripComments(processedCode, options);
-    // Remove empty lines at the start/end ONLY when keepEmptyLines is false
-    return trimEmptyLines(result);
-  } catch (error) {
-    console.error('Error removing JavaScript comments:', error);
-    return code;
-  }
+  const result = removeBySpec(processedCode, jsSpec(preserveLicense), preserveLicense, false);
+  return trimEmptyLines(result);
 }
 
 /**
@@ -64,7 +100,7 @@ export function removeJavaScriptComments(
  * @returns Processed code
  */
 export function removeTypeScriptComments(
-  code: string, 
+  code: string,
   preserveLicense: boolean = false,
   keepEmptyLines: boolean = false
 ): string {
@@ -76,22 +112,28 @@ export function removeTypeScriptComments(
  */
 function trimEmptyLines(code: string): string {
   const lines = code.split('\n');
-  
+
   // Remove empty lines at the start
   while (lines.length > 0 && lines[0].trim() === '') {
     lines.shift();
   }
-  
+
   // Remove empty lines at the end
   while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
     lines.pop();
   }
-  
+
   return lines.join('\n');
 }
 
 /**
- * Removes comments from code while preserving line breaks and empty lines
+ * Removes comments from code while preserving line breaks and empty lines.
+ *
+ * This is a per-line scanner (no cross-line state machine that could
+ * backtrack), used only for the `keepEmptyLines` path. It reproduces the
+ * historical behaviour where a whole-line comment immediately followed by a
+ * blank line collapses to a single blank line.
+ *
  * @param code - The source code to process
  * @param preserveLicense - Whether to preserve license and copyright comments
  * @returns Code with comments removed but line structure preserved
@@ -100,35 +142,32 @@ function removeCommentsPreservingLines(code: string, preserveLicense: boolean): 
   const lines = code.split('\n');
   const result: string[] = [];
   let inMultilineComment = false;
-  let skipMultilineComment = false;
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const trimmed = line.trim();
-    
+
     // Process multi-line comments /* ... */
     if (!inMultilineComment) {
       const commentStart = findCommentStart(line);
-      
+
       if (commentStart !== -1 && line.substring(commentStart).startsWith('/*')) {
         const beforeComment = line.substring(0, commentStart).trimEnd();
-        
+
         // Check for license/copyright comment
         const isProtected = preserveLicense && (
           line.substring(commentStart).startsWith('/*!') ||
           line.substring(commentStart).toLowerCase().includes('license') ||
           line.substring(commentStart).toLowerCase().includes('copyright')
         );
-        
+
         if (isProtected) {
           result.push(line);
           if (line.indexOf('*/', commentStart + 2) === -1) {
             inMultilineComment = true;
-            skipMultilineComment = false;
           }
           continue;
         }
-        
+
         // Check if the comment ends on the same line
         const commentEnd = line.indexOf('*/', commentStart + 2);
         if (commentEnd !== -1) {
@@ -149,7 +188,6 @@ function removeCommentsPreservingLines(code: string, preserveLicense: boolean): 
         } else {
           // Multi-line comment starts
           inMultilineComment = true;
-          skipMultilineComment = true;
           if (beforeComment.length > 0) {
             result.push(beforeComment);
           } else {
@@ -180,27 +218,26 @@ function removeCommentsPreservingLines(code: string, preserveLicense: boolean): 
             result.push('');
           }
         }
-        skipMultilineComment = false;
       } else {
         // Inside multi-line comment - skip the line without adding empty line
         continue;
       }
       continue;
     }
-    
+
     // Handle single-line comments //
     const commentIndex = findCommentStart(line);
     if (commentIndex !== -1 && line.substring(commentIndex).startsWith('//')) {
       const beforeComment = line.substring(0, commentIndex).trimEnd();
       const comment = line.substring(commentIndex);
-      
+
       // Check for license/copyright
       const isLicense = preserveLicense && (
         comment.includes('@license') ||
         comment.toLowerCase().includes('license') ||
         comment.toLowerCase().includes('copyright')
       );
-      
+
       if (isLicense) {
         result.push(line);
       } else if (beforeComment.length > 0) {
@@ -217,37 +254,43 @@ function removeCommentsPreservingLines(code: string, preserveLicense: boolean): 
       }
       continue;
     }
-    
-    // Обикновен ред с код или празен ред
+
+    // Ordinary line of code or a blank line.
     result.push(line);
   }
-  
+
   return result.join('\n');
 }
 
 /**
- * Finds the start of a comment (// or /*) outside of strings and regex
+ * Finds the start of a comment (// or /*) outside of strings and regex.
+ *
+ * A simple per-line scanner used by the `keepEmptyLines` path. It is linear in
+ * the line length and cannot backtrack.
+ *
+ * @param line - A single line of source code.
+ * @returns The index of the comment start, or -1 if there is none.
  */
 function findCommentStart(line: string): number {
   let inString = false;
   let stringChar = '';
   let inRegex = false;
   let escapeNext = false;
-  
+
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
     const nextChar = i < line.length - 1 ? line[i + 1] : '';
-    
+
     if (escapeNext) {
       escapeNext = false;
       continue;
     }
-    
+
     if (char === '\\' && (inString || inRegex)) {
       escapeNext = true;
       continue;
     }
-    
+
     // String handling
     if (char === '"' || char === "'" || char === '`') {
       if (!inString && !inRegex) {
@@ -258,7 +301,7 @@ function findCommentStart(line: string): number {
       }
       continue;
     }
-    
+
     // Regex handling (simplified)
     if (char === '/' && !inString && !inRegex) {
       // Check if this is a regex or a comment
@@ -271,12 +314,12 @@ function findCommentStart(line: string): number {
       }
       continue;
     }
-    
+
     if (char === '/' && inRegex) {
       inRegex = false;
       continue;
     }
   }
-  
+
   return -1;
 }

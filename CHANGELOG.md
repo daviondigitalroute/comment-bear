@@ -5,6 +5,15 @@ All notable changes to the Comment Bear project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2026-06-01
+
+### Fixed
+- **Critical: infinite hang / catastrophic backtracking** on JavaScript/TypeScript (and the C-style languages that delegate to it: Java, C#, C, C++, PHP, Go, Rust, Swift, Kotlin, Scala) when the input interleaved regex literals (`/.../`) with `//` line comments. The hang was inside the `strip-comments` dependency. The JavaScript remover is now a linear, single-pass scanner (`removeBySpec` with regex-literal awareness) that cannot backtrack, with a hard iteration safety valve as defense-in-depth.
+- Regex-vs-division disambiguation uses an incrementally-tracked "previous significant token" (O(1) per character), so large regex/division-heavy files are processed in linear time. Postfix `++`/`--` (and `)`/`]` value closers) before `/` are correctly treated as division, not a regex.
+
+### Changed
+- **Removed the `strip-comments` runtime dependency** — the package now has **zero runtime dependencies**.
+
 ## [1.2.1] - 2026-06-01
 
 ### Changed
