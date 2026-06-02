@@ -27,6 +27,24 @@ describe('preserveLicense / keepEmptyLines correctness', () => {
     test('a non-license block is still removed (and code kept)', () => {
       expect(sql('/* just a comment */\nSELECT 1;', false).trim()).toBe('SELECT 1;');
     });
+
+    test('inline license comment is NOT reordered ahead of its code', () => {
+      expect(sql('SELECT 1; /* Copyright */')).toBe('SELECT 1; /* Copyright */');
+    });
+
+    test('inline license with code after it keeps both, in order', () => {
+      expect(sql('SELECT 1; /* Copyright */ SELECT 2;')).toBe('SELECT 1; /* Copyright */ SELECT 2;');
+    });
+
+    test('a -- inside a string is not a comment', () => {
+      expect(sql("SELECT '-- not a comment'", false)).toBe("SELECT '-- not a comment'");
+    });
+
+    test('does not hang on pathological unterminated block input', () => {
+      const start = Date.now();
+      removeComments('/*' + 'a'.repeat(200000), { language: 'sql', preserveLicense: true });
+      expect(Date.now() - start).toBeLessThan(1000);
+    }, 5000);
   });
 
   describe('Rust preserveLicense keeps ordinary // and /* */ license comments', () => {
