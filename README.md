@@ -7,10 +7,10 @@
 
   [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?style=flat-square&logo=github)](https://github.com/ivan-markov-666/comment-bear)
   [![npm](https://img.shields.io/badge/npm-comment--bear-blue?style=flat-square&logo=npm)](https://www.npmjs.com/package/comment-bear)
-  [![Tests](https://img.shields.io/badge/tests-1501%2B-brightgreen?style=flat-square)](https://github.com/ivan-markov-666/comment-bear)
+  [![Tests](https://img.shields.io/badge/tests-1520%2B-brightgreen?style=flat-square)](https://github.com/ivan-markov-666/comment-bear)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
-  🐻 A fast, string-aware tool for removing comments from code in **80+ programming languages**. Written in TypeScript, ships a CLI and a Stream API, has zero runtime dependencies, and is covered by **1501+ tests**.
+  🐻 A fast, string-aware tool for removing comments from code in **80+ programming languages**. Written in TypeScript, ships a CLI and a Stream API, has zero runtime dependencies, and is covered by **1520+ tests**.
 </div>
 
 ## ✨ Features
@@ -427,7 +427,7 @@ const config2 = loadConfig('.commentbearrc');
 ## 🧪 Testing
 
 ```bash
-# Run tests (1501+)
+# Run tests (1520+)
 npm test
 
 # Run tests with coverage (enforces a coverage threshold)
@@ -485,7 +485,7 @@ comment-bear/
 │       │                       # Scheme, Emacs Lisp, Assembly, Erlang, LaTeX, MATLAB,
 │       │                       # Prolog, OCaml, F#, SML, Pascal, VB, Batch, Fortran, Vim
 │       └── hybrid-remover.ts   # Vue, Svelte, Markdown (section-aware)
-├── test/                     # Tests (1501+ test cases)
+├── test/                     # Tests (1520+ test cases)
 ├── dist/                     # Compiled files (auto-generated)
 ├── package.json
 ├── tsconfig.json
