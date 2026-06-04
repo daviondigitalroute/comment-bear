@@ -1,0 +1,190 @@
+{
+  "name": "comment-bear-vscode",
+  "displayName": "Comment Bear",
+  "description": "Remove comments from code in 80+ languages — in the editor, in a diff preview, or across whole folders.",
+  "version": "1.0.0",
+  "publisher": "ivan-markov-666",
+  "license": "MIT",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Formatters",
+    "Other"
+  ],
+  "keywords": [
+    "comment",
+    "remove comments",
+    "strip comments",
+    "cleanup",
+    "comment bear"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ivan-markov-666/comment-bear.git",
+    "directory": "extension"
+  },
+  "bugs": {
+    "url": "https://github.com/ivan-markov-666/comment-bear/issues"
+  },
+  "homepage": "https://github.com/ivan-markov-666/comment-bear#readme",
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "commentBear.removeInEditor",
+        "title": "Remove Comments",
+        "category": "Comment Bear"
+      },
+      {
+        "command": "commentBear.previewInEditor",
+        "title": "Preview Comment Removal (Diff)",
+        "category": "Comment Bear"
+      },
+      {
+        "command": "commentBear.copyWithoutComments",
+        "title": "Copy Without Comments",
+        "category": "Comment Bear"
+      },
+      {
+        "command": "commentBear.countComments",
+        "title": "Count Comments",
+        "category": "Comment Bear"
+      },
+      {
+        "command": "commentBear.removeInExplorer",
+        "title": "Remove Comments (Comment Bear)",
+        "category": "Comment Bear"
+      }
+    ],
+    "submenus": [
+      {
+        "id": "commentBear.editorSubmenu",
+        "label": "Comment Bear"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "commentBear.editorSubmenu",
+          "group": "1_modification"
+        }
+      ],
+      "commentBear.editorSubmenu": [
+        {
+          "command": "commentBear.removeInEditor",
+          "group": "1_run@1"
+        },
+        {
+          "command": "commentBear.previewInEditor",
+          "group": "1_run@2"
+        },
+        {
+          "command": "commentBear.copyWithoutComments",
+          "group": "1_run@3"
+        },
+        {
+          "command": "commentBear.countComments",
+          "group": "1_run@4"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "commentBear.removeInExplorer",
+          "group": "7_modification",
+          "when": "explorerResourceIsFolder || resourceScheme == file"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "commentBear.removeInExplorer",
+          "when": "false"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "commentBear.removeInEditor",
+        "key": "ctrl+alt+/",
+        "mac": "cmd+alt+/",
+        "when": "editorTextFocus && !editorReadonly"
+      },
+      {
+        "command": "commentBear.previewInEditor",
+        "key": "ctrl+alt+shift+/",
+        "mac": "cmd+alt+shift+/",
+        "when": "editorTextFocus"
+      }
+    ],
+    "configuration": {
+      "title": "Comment Bear",
+      "properties": {
+        "commentBear.preserveLicense": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Keep license/copyright comments (those containing `copyright`, `license`, `@license`, `@author`, `SPDX`, …) instead of removing them."
+        },
+        "commentBear.keepEmptyLines": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Leave a blank line where a removed comment was, preserving line numbers/layout."
+        },
+        "commentBear.showDiffPreview": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "When running **Remove Comments**, first open a diff (original ↔ cleaned) and ask for confirmation. Turn off to apply immediately."
+        },
+        "commentBear.confirmFolderOperations": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Ask for confirmation before modifying multiple files (folder / batch operations)."
+        },
+        "commentBear.exclude": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["**/node_modules/**", "**/dist/**", "**/.git/**", "**/out/**", "**/build/**"],
+          "markdownDescription": "Glob patterns to skip during folder/batch operations."
+        },
+        "commentBear.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Show a 🐻 status-bar item with the comment count of the active file (click to remove)."
+        },
+        "commentBear.languageOverride": {
+          "type": "string",
+          "default": "auto",
+          "markdownDescription": "Force a specific Comment Bear language for all operations, or `auto` to detect from the file type/extension.",
+          "enum": [
+            "auto",
+            "javascript", "typescript", "java", "csharp", "c", "cpp", "go", "rust", "swift",
+            "kotlin", "scala", "php", "dart", "groovy", "solidity", "protobuf", "objectivec",
+            "zig", "vala", "d", "glsl", "hlsl", "wgsl", "json5", "scss", "less", "sass", "hcl",
+            "puppet", "python", "ruby", "shell", "powershell", "perl", "r", "toml", "yaml",
+            "makefile", "dockerfile", "ini", "graphql", "elixir", "crystal", "julia", "nim",
+            "coffeescript", "tcl", "cmake", "properties", "sql", "haskell", "lua", "elm", "ada",
+            "vhdl", "applescript", "clojure", "commonlisp", "scheme", "emacslisp", "assembly",
+            "erlang", "latex", "matlab", "prolog", "ocaml", "fsharp", "sml", "pascal", "vb",
+            "batch", "fortran", "vimscript", "html", "xml", "css", "json", "vue", "svelte", "markdown"
+          ]
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "node esbuild.js --production",
+    "watch": "node esbuild.js --watch",
+    "compile": "tsc --noEmit",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.75.0",
+    "esbuild": "^0.21.0",
+    "typescript": "^5.4.0"
+  }
+}

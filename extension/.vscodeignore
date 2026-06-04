@@ -1,0 +1,12 @@
+# Only ship the bundled output + metadata; exclude sources and dev files.
+.vscode/**
+src/**
+node_modules/**
+esbuild.js
+tsconfig.json
+**/*.map
+**/*.ts
+.gitignore
+_*.js
+# Keep: dist/extension.js, package.json, README.md, CHANGELOG.md, LICENSE, icon.png
+!dist/extension.js
