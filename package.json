@@ -11,6 +11,7 @@
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "build": "npm run clean && tsc",
     "prepack": "npm run build",
+    "prepare": "npm run build",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "prepublishOnly": "npm run build && npm test",
